@@ -34,32 +34,34 @@ class EditorConfigurationPage(ConfigurationPage):
 
         add_vertical_separator(self)
 
-        add_option_checkbox(
-            self,
-            "edit.automatic_calltips",
-            tr("Automatically show parameter info after typing '('"),
-        )
+        # 禁用自动参数提示，避免终端卡顿
+        # add_option_checkbox(
+        #     self,
+        #     "edit.automatic_calltips",
+        #     tr("Automatically show parameter info after typing '('"),
+        # )
 
-        add_option_checkbox(
-            self,
-            "edit.automatic_completions",
-            tr("Automatically propose completions while typing"),
-        )
-        add_option_checkbox(
-            self,
-            "edit.automatic_completion_details",
-            tr("Automatically show documentation for completions"),
-        )
-        add_option_checkbox(
-            self,
-            "edit.tab_request_completions_in_editors",
-            tr("Request completions with Tab-key in editors"),
-        )
-        add_option_checkbox(
-            self,
-            "edit.tab_request_completions_in_shell",
-            tr("Request completions with Tab-key in Shell"),
-        )
+        # 禁用自动补全功能，避免终端卡顿
+        # add_option_checkbox(
+        #     self,
+        #     "edit.automatic_completions",
+        #     tr("Automatically propose completions while typing"),
+        # )
+        # add_option_checkbox(
+        #     self,
+        #     "edit.automatic_completion_details",
+        #     tr("Automatically show documentation for completions"),
+        # )
+        # add_option_checkbox(
+        #     self,
+        #     "edit.tab_request_completions_in_editors",
+        #     tr("Request completions with Tab-key in editors"),
+        # )
+        # add_option_checkbox(
+        #     self,
+        #     "edit.tab_request_completions_in_shell",
+        #     tr("Request completions with Tab-key in Shell"),
+        # )
 
         add_vertical_separator(self)
 

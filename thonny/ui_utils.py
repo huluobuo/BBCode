@@ -66,7 +66,7 @@ class CustomToolbutton(tk.Frame):
             self.current_image = self.normal_image
 
         super().__init__(
-            master, background=self.normal_background, borderwidth=borderwidth, relief="solid"
+            master, background=self.normal_background, borderwidth=borderwidth, relief="flat"
         )
         kw = {}
         if font is not None:
@@ -696,6 +696,9 @@ class EnhancedTextWithLogging(tktextext.EnhancedText):
         )
 
         self._last_event_changed_line_count = False
+        # 批量处理模式，减少事件触发频率
+        self._batch_mode = False
+        self._pending_events = []
 
     def direct_insert(self, index, chars, tags=None, **kw):
         # try removing line numbers
@@ -713,7 +716,7 @@ class EnhancedTextWithLogging(tktextext.EnhancedText):
             chars, line_before, line_after
         )
         if not self._suppress_events:
-            get_workbench().event_generate(
+            self._generate_event(
                 "TextInsert",
                 index=concrete_index,
                 text=chars,
@@ -749,7 +752,7 @@ class EnhancedTextWithLogging(tktextext.EnhancedText):
                 chars, line_before, line_after
             )
             if not self._suppress_events:
-                get_workbench().event_generate(
+                self._generate_event(
                     "TextDelete",
                     index1=concrete_index1,
                     index2=concrete_index2,
@@ -796,6 +799,22 @@ class EnhancedTextWithLogging(tktextext.EnhancedText):
             trivial_for_parens = trivial_for_coloring
 
         return trivial_for_coloring, trivial_for_parens
+
+    def set_batch_mode(self, enabled: bool):
+        """启用或禁用批量处理模式，减少事件触发频率"""
+        self._batch_mode = enabled
+        if not enabled and self._pending_events:
+            # 批量模式结束时，发送所有挂起的事件
+            for event_data in self._pending_events:
+                get_workbench().event_generate(**event_data)
+            self._pending_events = []
+
+    def _generate_event(self, sequence, **kwargs):
+        """生成事件，支持批量模式"""
+        if self._batch_mode:
+            self._pending_events.append({"sequence": sequence, **kwargs})
+        else:
+            get_workbench().event_generate(sequence, **kwargs)
 
 
 class SafeScrollbar(ttk.Scrollbar):

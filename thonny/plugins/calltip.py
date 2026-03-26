@@ -116,9 +116,10 @@ class Calltipper:
         self._calltip_box: Optional[CalltipBox] = None
         get_workbench().bind("get_editor_calltip_response", self.handle_response, True)
         get_workbench().bind("get_shell_calltip_response", self.handle_response, True)
-        get_workbench().bind("AutocompletionInserted", self._on_autocomplete_insertion, True)
-        get_workbench().bind_class("EditorCodeViewText", "<Key>", self._on_text_key, True)
-        get_workbench().bind_class("ShellText", "<Key>", self._on_text_key, True)
+        # 禁用自动补全相关的参数提示，避免终端卡顿
+        # get_workbench().bind("AutocompletionInserted", self._on_autocomplete_insertion, True)
+        # get_workbench().bind_class("EditorCodeViewText", "<Key>", self._on_text_key, True)
+        # get_workbench().bind_class("ShellText", "<Key>", self._on_text_key, True)
 
     def request_calltip(self) -> None:
         text = get_active_text_widget()
@@ -218,7 +219,9 @@ class Calltipper:
             self.request_calltip_for_text(text)
 
     def _should_show_automatically(self) -> bool:
-        return get_workbench().get_option("edit.automatic_calltips")
+        # 禁用自动参数提示，避免终端卡顿
+        return False
+        # return get_workbench().get_option("edit.automatic_calltips")
 
     def _box_is_visible(self):
         return self._calltip_box and self._calltip_box.is_visible()

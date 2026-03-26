@@ -797,3 +797,19 @@ def load_plugin() -> None:
 
     if "aqua" in original_themes:
         get_workbench().add_ui_theme("macOS", "aqua", enhanced_aqua, enhanced_aqua_dark_overrides)
+
+    # Load glass morphism themes
+    try:
+        from plugins.glass_ui_themes import load_plugin as load_glass_themes
+        load_glass_themes()
+    except ImportError as e:
+        import logging
+        logging.getLogger("thonny").debug(f"Could not load glass themes: {e}")
+
+    # Load UI animations
+    try:
+        from plugins.ui_animations import load_plugin as load_animations
+        load_animations()
+    except ImportError as e:
+        import logging
+        logging.getLogger("thonny").debug(f"Could not load UI animations: {e}")

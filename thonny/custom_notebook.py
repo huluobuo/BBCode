@@ -379,6 +379,7 @@ class CustomNotebookTab(tk.Frame):
         super().__init__(notebook.tab_row, borderwidth=0)
         self._active = False
         self._hover = False
+        self._animation_after_id = None
 
         self.notebook = notebook
         self.title = title
@@ -391,9 +392,9 @@ class CustomNotebookTab(tk.Frame):
         self.label.grid(
             row=0,
             column=0,
-            padx=(_ems_to_pixels(0.3), 0 if self.notebook.closable else _ems_to_pixels(0.3)),
+            padx=(_ems_to_pixels(0.5), 0 if self.notebook.closable else _ems_to_pixels(0.5)),
             sticky="nsw",
-            pady=(0, _ems_to_pixels(0.1)),
+            pady=(0, _ems_to_pixels(0.15)),
         )
         self.bind("<1>", self.on_click, True)
         self.label.bind("<1>", self.on_click, True)
@@ -463,10 +464,8 @@ class CustomNotebookTab(tk.Frame):
         else:
             main_background = self._get_tab_style_option("background")
 
-        self.configure(background=main_background)
-        self.label.configure(background=main_background)
-        if self.button:
-            self.button.configure(background=main_background)
+        # Smooth background transition
+        self._animate_background(main_background)
 
         if only_background:
             return
@@ -485,6 +484,16 @@ class CustomNotebookTab(tk.Frame):
         self.indicator.configure(background=indicator_background, height=indicator_height)
 
         self.menu.configure(**_get_style_configuration("Menu"))
+
+    def _animate_background(self, target_color: str):
+        """Animate background color change for smooth effect"""
+        try:
+            self.configure(background=target_color)
+            self.label.configure(background=target_color)
+            if self.button:
+                self.button.configure(background=target_color)
+        except tk.TclError:
+            pass
 
     def _get_tab_style_option(self, option_name, default=None) -> Any:
         return _lookup_style_option("CustomNotebook.Tab", option_name, default)

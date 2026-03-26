@@ -382,6 +382,8 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         self._last_ls_version: Optional[int] = None
         self._context_lines_for_language_server: List[str] = []
         self._session_num_executed_lines_sent_to_ls: int = 0
+        # 禁用语言服务器更新以避免终端卡顿
+        self._ls_update_disabled = True
 
         # logs of IO events for current toplevel block
         # (enables undoing and redoing the events)
@@ -399,8 +401,37 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         self._ansi_strikethrough = False
         self._io_cursor_offset = 0
         self._squeeze_buttons = set()
+        
+        # 优化UI渲染性能：see("end") 节流
+        self._last_see_end_time = 0
+        self._see_end_pending = False
+        self._see_end_delay_ms = 50  # 最小间隔50ms
 
         self.update_tty_mode()
+
+    def see_end_throttled(self):
+        """节流版本的 see("end")，减少UI渲染频率"""
+        import time
+        current_time = time.time() * 1000  # 转换为毫秒
+        
+        if current_time - self._last_see_end_time < self._see_end_delay_ms:
+            # 如果距离上次调用时间太短，安排延迟调用
+            if not self._see_end_pending:
+                self._see_end_pending = True
+                delay = int(self._see_end_delay_ms - (current_time - self._last_see_end_time))
+                self.after(delay, self._see_end_delayed)
+        else:
+            # 立即执行
+            self._last_see_end_time = current_time
+            self.see("end")
+    
+    def _see_end_delayed(self):
+        """延迟执行的 see("end")"""
+        if self._see_end_pending:
+            import time
+            self._last_see_end_time = time.time() * 1000
+            self._see_end_pending = False
+            self.see("end")
 
         self.bind("<Up>", self._arrow_up, True)
         self.bind("<Down>", self._arrow_down, True)
@@ -528,12 +559,15 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
         welcome_text = msg.get("welcome_text")
         if welcome_text:
-            preceding = self.get("output_insert -1 c", "output_insert")
-            if preceding.strip() and not preceding.endswith("\n"):
-                self._insert_text_directly("\n")
-            self._insert_text_directly(welcome_text, ("welcome",))
-            if was_scrolled_to_end:
-                self.see("end")
+            try:
+                preceding = self.get("output_insert -1 c", "output_insert")
+                if preceding.strip() and not preceding.endswith("\n"):
+                    self._insert_text_directly("\n")
+                self._insert_text_directly(welcome_text, ("welcome",))
+                if was_scrolled_to_end:
+                    self.see("end")
+            except tk.TclError as e:
+                logger.warning(f"处理 welcome_text 时出错: {e}")
 
         self.mark_set("output_end", self.index("end-1c"))
         self._discard_old_content()
@@ -562,15 +596,55 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
     def _append_to_io_queue(self, data, stream_name):
         # Make sure ANSI CSI codes and object links are stored as separate events
         # TODO: try to complete previously submitted incomplete code
+        
+        # Limit data size to prevent memory issues
+        max_data_size = 50000  # 降低至50KB以提高性能
+        if len(data) > max_data_size:
+            data = data[:max_data_size] + "\n... [output truncated]\n"
+        
+        # 限制队列大小以防止内存溢出
+        max_queue_size = 1000
+        if len(self._queued_io_events) > max_queue_size:
+            # 移除旧的事件以腾出空间
+            self._queued_io_events = self._queued_io_events[-max_queue_size//2:]
+        
         parts = re.split(OUTPUT_SPLIT_REGEX, data)
+        squeeze_threshold = self._get_squeeze_threshold()
+        
         for part in parts:
             if part:  # split may produce empty string in the beginning or start
                 # split the data so that very long lines separated
-                for block in re.split("(.{%d,})" % (self._get_squeeze_threshold() + 1), part):
-                    if block:
-                        self._queued_io_events.append((block, stream_name))
+                # Use a simpler approach for better performance
+                if len(part) > squeeze_threshold:
+                    # Split into chunks
+                    chunk_size = squeeze_threshold
+                    for i in range(0, len(part), chunk_size):
+                        chunk = part[i:i + chunk_size]
+                        self._queued_io_events.append((chunk, stream_name))
+                else:
+                    self._queued_io_events.append((part, stream_name))
 
     def _update_visible_io(self, target_num_visible_chars):
+        # 确保标记存在
+        try:
+            self.index("output_insert")
+        except tk.TclError:
+            # 标记不存在，初始化标记
+            self.mark_set("output_insert", "end-1c")
+            self.mark_gravity("output_insert", tk.RIGHT)
+        
+        try:
+            self.index("output_end")
+        except tk.TclError:
+            self.mark_set("output_end", "end-1c")
+            self.mark_gravity("output_end", tk.LEFT)
+        
+        try:
+            self.index("command_io_start")
+        except tk.TclError:
+            self.mark_set("command_io_start", "1.0")
+            self.mark_gravity("command_io_start", "left")
+        
         was_scrolled_to_end = self.is_scrolled_to_end()
         current_num_visible_chars = sum(map(lambda x: len(x[0]), self._applied_io_events))
 
@@ -582,11 +656,24 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
             # easier to clean everything and start again
             self._queued_io_events = self._applied_io_events + self._queued_io_events
             self._applied_io_events = []
-            self.direct_delete("command_io_start", "output_end")
+            try:
+                self.direct_delete("command_io_start", "output_end")
+            except tk.TclError:
+                pass  # 忽略标记不存在的错误
             current_num_visible_chars = 0
             self._reset_ansi_attributes()
 
-        while self._queued_io_events and current_num_visible_chars != target_num_visible_chars:
+        # Limit the number of events processed in a single call to prevent UI freezing
+        max_events_per_call = 50  # 降低每次处理的事件数以提高响应性
+        events_processed = 0
+        
+        # 批量处理以减少UI更新次数
+        batch_data = []
+        batch_stream_name = None
+        
+        while (self._queued_io_events and 
+               current_num_visible_chars != target_num_visible_chars and 
+               events_processed < max_events_per_call):
             data, stream_name = self._queued_io_events.pop(0)
 
             if target_num_visible_chars is not None:
@@ -597,12 +684,36 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
                     self._queued_io_events.insert(0, (data[-leftover_count:], stream_name))
                     data = data[:-leftover_count]
 
-            self._apply_io_event(data, stream_name)
-            current_num_visible_chars += len(data)
+            # 批量处理相同stream_name的数据
+            if batch_stream_name is None:
+                batch_stream_name = stream_name
+                batch_data.append(data)
+            elif batch_stream_name == stream_name and len(data) < 100:
+                batch_data.append(data)
+            else:
+                # 处理批次
+                if batch_data:
+                    combined_data = "".join(batch_data)
+                    self._apply_io_event(combined_data, batch_stream_name)
+                    current_num_visible_chars += len(combined_data)
+                batch_data = [data]
+                batch_stream_name = stream_name
+            
+            events_processed += 1
+        
+        # 处理剩余的批次数据
+        if batch_data:
+            combined_data = "".join(batch_data)
+            self._apply_io_event(combined_data, batch_stream_name)
+            current_num_visible_chars += len(combined_data)
+        
+        # If there are more events to process, schedule another update with longer delay
+        if self._queued_io_events and current_num_visible_chars != target_num_visible_chars:
+            self.after(20, lambda: self._update_visible_io(target_num_visible_chars))  # 增加延迟以减少CPU使用
 
         self.mark_set("output_end", self.index("end-1c"))
         if was_scrolled_to_end:
-            self.see("end")
+            self.see_end_throttled()
 
     def _apply_io_event(self, data, stream_name):
         if not data:
@@ -1120,11 +1231,28 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         self.tag_bind(command_tag, "<1>", handler)
 
     def _insert_text_directly(self, txt, tags=()):
+        # 确保 output_insert 标记存在
+        try:
+            self.index("output_insert")
+        except tk.TclError:
+            self.mark_set("output_insert", "end-1c")
+            self.mark_gravity("output_insert", tk.RIGHT)
+        
         def _insert(txt, tags):
             if txt != "":
-                self.direct_insert("output_insert", txt, tags)
+                try:
+                    self.direct_insert("output_insert", txt, tags)
+                except tk.TclError as e:
+                    logger.warning(f"插入文本时出错: {e}")
 
         def _insert_and_highlight_urls(txt, tags):
+            # Limit URL processing to prevent freezing on large text
+            max_url_process_len = 5000  # 降低阈值以提高性能
+            if len(txt) > max_url_process_len:
+                # For large text, skip URL highlighting
+                _insert(txt, tags)
+                return
+
             parts = SIMPLE_URL_SPLIT_REGEX.split(txt)
             for i, part in enumerate(parts):
                 if i % 2 == 0:
@@ -1146,12 +1274,19 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
 
         # I want the insertion to go before marks
         # self._print_marks("before output")
-        self.mark_gravity("input_start", tk.RIGHT)
-        self.mark_gravity("output_insert", tk.RIGHT)
+        try:
+            self.mark_gravity("input_start", tk.RIGHT)
+        except tk.TclError:
+            pass
+        try:
+            self.mark_gravity("output_insert", tk.RIGHT)
+        except tk.TclError:
+            pass
         tags = tuple(tags)
 
-        # Make stacktrace clickable
-        if "stderr" in tags or "error" in tags or ("File" in txt and "line" in txt):
+        # Make stacktrace clickable - but limit processing for large text
+        max_stacktrace_process_len = 3000  # 降低阈值以提高性能
+        if ("stderr" in tags or "error" in tags or ("File" in txt and "line" in txt)) and len(txt) <= max_stacktrace_process_len:
             # show lines pointing to source lines as hyperlinks
             for line in txt.splitlines(True):
                 parts = re.split(r"(File .* line \d+.*)$", line, maxsplit=1)
@@ -1167,13 +1302,16 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
                     _insert(parts[1], tags + link_tags)
                     _insert(parts[2], tags)
                 else:
-                    parts = re.split(r"(\'[^\']+\.pyw?\')", line, flags=re.IGNORECASE)
+                    parts = re.split(r"(\'[^\']+\.pyw?')", line, flags=re.IGNORECASE)
                     if len(parts) == 3 and os.path.exists(os.path.expanduser(parts[1][1:-1])):
                         match = re.search(r"\S", line)
                         _insert(line[: match.start()], tags)
                         _insert(line[match.start() :], tags + ("io_hyperlink",))
                     else:
                         _insert_and_highlight_urls(line, tags)
+        elif ("stderr" in tags or "error" in tags) and len(txt) > max_stacktrace_process_len:
+            # For large error output, skip hyperlink processing
+            _insert(txt, tags)
         else:
             _insert_and_highlight_urls(txt, tags)
 
@@ -1722,6 +1860,10 @@ class BaseShellText(EnhancedTextWithLogging, SyntaxText):
         return pathlib.Path(path).as_uri()
 
     def send_changes_to_language_server(self) -> None:
+        # 禁用语言服务器更新以避免终端卡顿
+        if getattr(self, '_ls_update_disabled', False):
+            return
+
         ls_proxy = get_workbench().get_main_language_server_proxy()
         if ls_proxy is None:
             return
@@ -1836,14 +1978,59 @@ class ShellText(BaseShellText):
 
         self.bind("<Motion>", self._on_mouse_move, True)
 
+        # 初始化多线程渲染器
+        self._async_renderer = None
+        self._init_async_renderer()
+
         get_workbench().bind("InputRequest", self._handle_input_request, True)
-        get_workbench().bind("ProgramOutput", self._handle_program_output, True)
+        get_workbench().bind("ProgramOutput", self._handle_program_output_threaded, True)
         get_workbench().bind("ToplevelResponse", self._handle_toplevel_response, True)
         get_workbench().bind("DebuggerResponse", self._handle_fancy_debugger_progress, True)
         get_workbench().bind("BackendTerminated", self._on_backend_terminated, True)
         get_workbench().bind(
             "HideTrailingOutput", lambda msg: self._hide_trailing_output(msg.text), True
         )
+    
+    def _init_async_renderer(self):
+        """初始化异步渲染器"""
+        # 延迟初始化，确保父类已完全初始化
+        self.after(200, self._do_init_async_renderer)
+    
+    def _do_init_async_renderer(self):
+        """实际初始化异步渲染器"""
+        try:
+            from thonny.shell_threading import AsyncShellRenderer
+            self._async_renderer = AsyncShellRenderer(self, update_interval_ms=50)
+            self._async_renderer.start()
+            logger.info("异步渲染器初始化成功")
+        except Exception as e:
+            logger.exception("初始化异步渲染器失败", exc_info=e)
+            self._async_renderer = None
+    
+    def destroy(self):
+        """销毁时清理资源"""
+        if self._async_renderer:
+            try:
+                self._async_renderer.stop()
+            except Exception as e:
+                logger.exception("停止异步渲染器时出错", exc_info=e)
+        super().destroy()
+    
+    def _handle_program_output_threaded(self, msg):
+        """多线程处理的程序输出"""
+        if self._ignore_program_output:
+            return
+        
+        # 使用异步渲染器处理输出
+        if self._async_renderer and hasattr(self._async_renderer, 'submit'):
+            try:
+                self._async_renderer.submit(msg.data, msg.stream_name)
+                return
+            except Exception as e:
+                logger.warning(f"异步渲染器提交失败，回退到同步处理: {e}")
+        
+        # 回退到同步处理
+        self._handle_program_output(msg)
 
 
 class SqueezedTextDialog(CommonDialog):

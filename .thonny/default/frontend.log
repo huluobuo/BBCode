@@ -1,0 +1,527 @@
+13:48:01.316 [MainThread] INFO    thonny: BBCode version: 5.0.0b1.dev0 (based on Thonny)
+13:48:01.317 [MainThread] INFO    thonny: cwd: D:\code\BBCode
+13:48:01.318 [MainThread] INFO    thonny: original argv: ['.\\python\\python.exe', 'launcher.py']
+13:48:01.318 [MainThread] INFO    thonny: sys.executable: D:\code\BBCode\python\python.exe
+13:48:01.319 [MainThread] INFO    thonny: sys.argv: ['launcher.py']
+13:48:01.319 [MainThread] INFO    thonny: sys.path: ['D:\\code\\BBCode', 'D:\\code\\BBCode\\thonny\\vendored_libs', 'D:\\code\\BBCode\\python\\python311.zip', 'D:\\code\\BBCode\\python\\DLLs', 'D:\\code\\BBCode\\python\\Lib', 'D:\\code\\BBCode\\python', 'D:\\code\\BBCode', 'D:\\code\\BBCode\\Lib\\site-packages']
+13:48:01.320 [MainThread] INFO    thonny: sys.flags: sys.flags(debug=0, inspect=0, interactive=0, optimize=0, dont_write_bytecode=0, no_user_site=0, no_site=0, ignore_environment=0, verbose=0, bytes_warning=0, quiet=0, hash_randomization=1, isolated=0, dev_mode=False, utf8_mode=0, warn_default_encoding=0, safe_path=False, int_max_str_digits=-1)
+13:48:01.912 [MainThread] INFO    thonny.workbench: Starting Workbench
+13:48:02.371 [MainThread] INFO    thonny.workbench: Creating runner
+13:48:02.381 [MainThread] INFO    thonny.workbench: Start loading plugins
+13:48:02.905 [MainThread] INFO    thonny.plugins.event_logging: Starting logging user events into 'D:\\code\\BBCode\\.thonny\\default\\user_logs\\2026-03-26_13-48-02__unknown.jsonl'
+13:48:02.928 [MainThread] INFO    thonny.workbench: Done loading plugins
+13:48:03.387 [MainThread] INFO    thonny.shell_threading: AsyncShellRenderer 已启动
+13:48:03.392 [MainThread] INFO    thonny.workbench: Adding view <thonny.shell.ShellView object .!frame.!workbenchpanedwindow.!shellview> to notebook .!frame.!workbenchpanedwindow.!workbenchpanedwindow2.!viewnotebook
+13:48:03.405 [MainThread] INFO    thonny.workbench: Notebook page opened: WorkbenchEvent(page=CustomNotebookPage(Shell, .!frame.!workbenchpanedwindow.!shellview), sequence='NotebookPageOpened')
+13:48:03.996 [MainThread] INFO    thonny.workbench: Adding view <thonny.plugins.chat.ChatView object .!frame.!workbenchpanedwindow.!chatview> to notebook .!frame.!workbenchpanedwindow.!workbenchpanedwindow3.!viewnotebook3
+13:48:04.009 [MainThread] INFO    thonny.workbench: Notebook page opened: WorkbenchEvent(page=CustomNotebookPage(AI编程助手, .!frame.!workbenchpanedwindow.!chatview), sequence='NotebookPageOpened')
+13:48:04.036 [MainThread] INFO    thonny.workbench: Opening views
+13:48:04.828 [MainThread] INFO    thonny.workbench: First <Visibility> event
+13:48:05.465 [MainThread] INFO    thonny.workbench: Finalizing startup
+13:48:05.753 [MainThread] INFO    thonny.workbench: Processing arguments {'profile': 'default', 'files': [], 'replayer': None, 'cwd': 'D:\\code\\BBCode'}
+13:48:05.834 [MainThread] INFO    thonny.running: Restarting back-end, clean: False, first: True, automatic: False
+13:48:05.835 [MainThread] INFO    thonny.running: Destroying backend
+13:48:05.835 [MainThread] INFO    thonny.running: Starting backend <class 'thonny.plugins.cpython_frontend.cp_front.LocalCPythonProxy'>
+13:48:05.837 [MainThread] INFO    thonny.plugins.cpython_frontend.cp_front: Creating LocalCPythonProxy
+13:48:05.839 [MainThread] INFO    thonny.running: Starting background process, clean: False, extra_args: []
+13:48:05.842 [MainThread] INFO    thonny.running: Starting the backend: ['D:\\code\\BBCode\\python\\python.exe', '-u', '-B', 'D:\\code\\BBCode\\thonny\\plugins\\cpython_backend\\cp_launcher.py', 'C:\\Users\\hu_lu', "{'run.warn_module_shadowing': True}"] C:\Users\hu_lu
+13:48:06.402 [MainThread] INFO    thonny.workbench: Handling backend restart
+13:48:06.427 [MainThread] INFO    thonny.workbench: Constructing language server <class 'thonny.plugins.pyright.PyrightProxy'>
+13:48:06.428 [MainThread] INFO    thonny.lsp_proxy: Starting language server
+13:48:06.431 [MainThread] INFO    thonny.plugins.pyright: Node path: 'D:\\code\\BBCode\\python\\node.exe'
+13:48:06.432 [MainThread] INFO    thonny.plugins.pyright: Pyright launcher: 'D:\\code\\BBCode\\thonny\\plugins\\..\\vendored_libs\\basedpyright\\langserver.index.js'
+13:48:06.563 [MainThread] INFO    thonny.lsp_proxy: Initializing language server
+13:48:06.575 [MainThread] INFO    thonny.plugins.pyright: Detected project path: None
+13:48:06.583 [MainThread] INFO    thonny.plugins.pyright: Using following basedpyright configuration: {'python': {}, 'basedpyright': {'analysis': {'diagnosticMode': 'openFilesOnly', 'diagnosticSeverityOverrides': {}, 'logLevel': 'Information'}}}
+13:48:06.584 [MainThread] INFO    thonny.workbench: Constructing language server <class 'thonny.plugins.ruff.RuffProxy'>
+13:48:06.589 [MainThread] INFO    thonny.lsp_proxy: Starting language server
+13:48:06.626 [MainThread] INFO    thonny.lsp_proxy: Initializing language server
+13:48:06.724 [MainThread] INFO    thonny.running: Back-end reported logfile: D:\code\BBCode\.thonny\default\backend.log
+13:48:06.725 [MainThread] ERROR   thonny.tktextext: [_dispatch_tk_operation] operation: get, args:('output_insert -1 c', 'output_insert')
+Traceback (most recent call last):
+  File "D:\code\BBCode\thonny\tktextext.py", line 52, in _dispatch_tk_operation
+    return self.tk.call((self._original_widget_name, operation) + args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: bad text index "output_insert -1 c"
+13:48:06.728 [MainThread] ERROR   thonny.tktextext: [_dispatch_tk_operation] operation: mark, args:('gravity', 'input_start', 'right')
+Traceback (most recent call last):
+  File "D:\code\BBCode\thonny\tktextext.py", line 50, in _dispatch_tk_operation
+    return f(*args)
+           ^^^^^^^^
+  File "D:\code\BBCode\thonny\tktextext.py", line 128, in intercept_mark
+    self.direct_mark(*args)
+  File "D:\code\BBCode\thonny\tktextext.py", line 155, in direct_mark
+    self._original_mark(*args)
+  File "D:\code\BBCode\thonny\tktextext.py", line 42, in original_function
+    self.tk.call((self._original_widget_name, operation) + args)
+_tkinter.TclError: there is no mark named "input_start"
+13:48:06.730 [MainThread] ERROR   thonny.tktextext: [_dispatch_tk_operation] operation: mark, args:('gravity', 'output_insert', 'right')
+Traceback (most recent call last):
+  File "D:\code\BBCode\thonny\tktextext.py", line 50, in _dispatch_tk_operation
+    return f(*args)
+           ^^^^^^^^
+  File "D:\code\BBCode\thonny\tktextext.py", line 128, in intercept_mark
+    self.direct_mark(*args)
+  File "D:\code\BBCode\thonny\tktextext.py", line 155, in direct_mark
+    self._original_mark(*args)
+  File "D:\code\BBCode\thonny\tktextext.py", line 42, in original_function
+    self.tk.call((self._original_widget_name, operation) + args)
+_tkinter.TclError: there is no mark named "output_insert"
+13:48:06.731 [MainThread] ERROR   thonny.tktextext: [_dispatch_tk_operation] operation: index, args:('output_insert',)
+Traceback (most recent call last):
+  File "D:\code\BBCode\thonny\tktextext.py", line 52, in _dispatch_tk_operation
+    return self.tk.call((self._original_widget_name, operation) + args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: bad text index "output_insert"
+13:48:06.734 [MainThread] ERROR   thonny.tktextext: [_dispatch_tk_operation] operation: get, args:(' linestart', ' lineend')
+Traceback (most recent call last):
+  File "D:\code\BBCode\thonny\tktextext.py", line 52, in _dispatch_tk_operation
+    return self.tk.call((self._original_widget_name, operation) + args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: bad text index " linestart"
+13:48:06.736 [MainThread] ERROR   thonny.workbench: Problem when handling 'ToplevelResponse'
+Traceback (most recent call last):
+  File "D:\code\BBCode\thonny\workbench.py", line 2312, in event_generate
+    handler(event)
+  File "D:\code\BBCode\thonny\shell.py", line 565, in _handle_toplevel_response
+    self._insert_text_directly(welcome_text, ("welcome",))
+  File "D:\code\BBCode\thonny\shell.py", line 1274, in _insert_text_directly
+    _insert_and_highlight_urls(txt, tags)
+  File "D:\code\BBCode\thonny\shell.py", line 1223, in _insert_and_highlight_urls
+    _insert(part, tags)
+  File "D:\code\BBCode\thonny\shell.py", line 1210, in _insert
+    self.direct_insert("output_insert", txt, tags)
+  File "D:\code\BBCode\thonny\ui_utils.py", line 713, in direct_insert
+    result = tktextext.EnhancedText.direct_insert(self, index, chars, tags=tags, **kw)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\code\BBCode\thonny\tktextext.py", line 801, in direct_insert
+    super().direct_insert(index, chars, tags, **kw)
+  File "D:\code\BBCode\thonny\tktextext.py", line 185, in direct_insert
+    self._original_insert(index, chars, tags, **kw)
+  File "D:\code\BBCode\thonny\tktextext.py", line 42, in original_function
+    self.tk.call((self._original_widget_name, operation) + args)
+_tkinter.TclError: bad text index "output_insert"
+13:48:07.052 [Thread-7 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: Traceback (most recent call last):
+
+13:48:07.053 [Thread-7 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR:   File "<frozen runpy>", line 198, in _run_module_as_main
+
+13:48:07.053 [Thread-7 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR:   File "<frozen runpy>", line 88, in _run_code
+
+13:48:07.054 [Thread-7 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR:   File "D:\code\BBCode\Lib\site-packages\ruff\__main__.py", line 27, in <module>
+
+13:48:07.054 [Thread-7 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR:     _run()
+
+13:48:07.055 [Thread-7 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR:   File "D:\code\BBCode\Lib\site-packages\ruff\__main__.py", line 10, in _run
+
+13:48:07.055 [Thread-7 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR:     ruff = find_ruff_bin()
+
+13:48:07.055 [Thread-7 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR:            ^^^^^^^^^^^^^^^
+
+13:48:07.056 [Thread-7 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR:   File "D:\code\BBCode\Lib\site-packages\ruff\_find_ruff.py", line 53, in find_ruff_bin
+
+13:48:07.056 [Thread-7 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR:     raise RuffNotFound(
+
+13:48:07.057 [Thread-7 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: ruff._find_ruff.RuffNotFound: Could not find the ruff binary in any of the following locations:
+
+13:48:07.057 [Thread-7 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR:  - D:\code\BBCode\Scripts
+
+13:48:07.057 [Thread-7 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR:  - D:\code\BBCode\python\Scripts
+
+13:48:07.058 [Thread-7 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR:  - D:\code\BBCode\Lib\site-packages\bin
+
+13:48:07.058 [Thread-7 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR:  - C:\Users\hu_lu\AppData\Roaming\Python\Python311\Scripts
+
+13:48:07.058 [Thread-7 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+
+13:48:07.079 [Thread-6 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:07.080 [Thread-7 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:07.082 [Thread-6 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:07.083 [Thread-7 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:07.084 [Thread-6 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:07.084 [Thread-7 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:07.084 [Thread-6 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:07.085 [Thread-7 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:07.085 [Thread-6 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:07.085 [Thread-7 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:07.087 [Thread-6 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:07.088 [Thread-7 (_listen_stderr)] INFO    thonny.lsp_proxy: _listen_stderr done
+13:48:07.088 [Thread-6 (_listen_stdout)] INFO    thonny.lsp_proxy: _listen_stdout done
+13:48:07.174 [MainThread] INFO    thonny.lsp_proxy: Stopping message processing
+13:48:07.426 [MainThread] INFO    thonny.lsp_proxy: Server initialized. Server info: __InitializeResult_serverInfo_Type_1(name='basedpyright', version='1.29.1')
+13:48:07.427 [MainThread] INFO    thonny.lsp_proxy: Server capabilities: ServerCapabilities(positionEncoding=None, textDocumentSync=TextDocumentSyncOptions(openClose=True, change=<TextDocumentSyncKind.Incremental: 2>, willSave=True, willSaveWaitUntil=None, save=None), notebookDocumentSync=NotebookDocumentSyncOptions(notebookSelector=[__NotebookDocumentSyncOptions_notebookSelector_Type_1(notebook=__NotebookDocumentFilter_Type_1(notebookType='jupyter-notebook', scheme='file', pattern=None), cells=[__NotebookDocumentSyncOptions_notebookSelector_cells_Type_1(language='python')])], save=True), completionProvider=CompletionOptions(triggerCharacters=['.', '[', '"', "'"], allCommitCharacters=None, resolveProvider=True, completionItem=CompletionOptionsCompletionItem(labelDetailsSupport=True), workDoneProgress=True), hoverProvider=HoverOptions(workDoneProgress=True), signatureHelpProvider=SignatureHelpOptions(triggerCharacters=['(', ',', ')'], retriggerCharacters=None, workDoneProgress=True), declarationProvider=DeclarationOptions(workDoneProgress=True), definitionProvider=DefinitionOptions(workDoneProgress=True), typeDefinitionProvider=TypeDefinitionOptions(workDoneProgress=True), implementationProvider=None, referencesProvider=ReferenceOptions(workDoneProgress=True), documentHighlightProvider=DocumentHighlightOptions(workDoneProgress=True), documentSymbolProvider=DocumentSymbolOptions(label=None, workDoneProgress=True), codeActionProvider=CodeActionOptions(codeActionKinds=[<CodeActionKind.QuickFix: 'quickfix'>, <CodeActionKind.SourceOrganizeImports: 'source.organizeImports'>], resolveProvider=None, workDoneProgress=True), codeLensProvider=None, documentLinkProvider=None, colorProvider=None, workspaceSymbolProvider=WorkspaceSymbolOptions(resolveProvider=None, workDoneProgress=True), documentFormattingProvider=None, documentRangeFormattingProvider=None, documentOnTypeFormattingProvider=None, renameProvider=RenameOptions(prepareProvider=True, workDoneProgress=True), foldingRangeProvider=None, selectionRangeProvider=None, executeCommandProvider=ExecuteCommandOptions(commands=[], workDoneProgress=True), callHierarchyProvider=True, linkedEditingRangeProvider=None, semanticTokensProvider=SemanticTokensOptions(legend=SemanticTokensLegend(tokenTypes=['class', 'parameter', 'typeParameter', 'function', 'method', 'decorator', 'property', 'namespace', 'variable', 'type', 'keyword'], tokenModifiers=['definition', 'declaration', 'async', 'readonly', 'defaultLibrary', 'builtin']), range=None, full=True, workDoneProgress=None), monikerProvider=None, typeHierarchyProvider=None, inlineValueProvider=None, inlayHintProvider=True, diagnosticProvider=None, workspace=__ServerCapabilities_workspace_Type_1(workspaceFolders=WorkspaceFoldersServerCapabilities(supported=True, changeNotifications=True), fileOperations=FileOperationOptions(didCreate=None, willCreate=None, didRename=None, willRename=FileOperationRegistrationOptions(filters=[FileOperationFilter(pattern=FileOperationPattern(glob='**/*', matches=None, options=None), scheme=None)]), didDelete=None, willDelete=None)), experimental=None)
+13:48:07.429 [MainThread] INFO    thonny.editors: Registering initialized language server <thonny.plugins.pyright.PyrightProxy object at 0x000002291F0B2BD0>
+13:48:07.430 [MainThread] INFO    thonny.editors: Connecting 'untitled:1' to language server <thonny.plugins.pyright.PyrightProxy object at 0x000002291F0B2BD0>
+13:48:07.449 [MainThread] INFO    thonny.plugins.pyright: Detected project path: None
+13:48:07.455 [MainThread] INFO    thonny.plugins.pyright: Using following basedpyright configuration: {'python': {'pythonPath': 'D:\\code\\BBCode\\python\\python.exe'}, 'basedpyright': {'analysis': {'diagnosticMode': 'openFilesOnly', 'diagnosticSeverityOverrides': {}, 'logLevel': 'Information'}}}
+13:48:28.327 [MainThread] INFO    thonny.workbench: Shutting down language server <thonny.plugins.pyright.PyrightProxy object at 0x000002291F0B2BD0>
+13:48:28.335 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.335 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.335 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.335 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.335 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.335 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.336 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.336 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.336 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.336 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.337 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.337 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.337 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.338 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.338 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.338 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.338 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.339 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.339 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.339 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.340 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.340 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.340 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.340 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.341 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.341 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.341 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.341 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.342 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.343 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.344 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.344 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.345 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.346 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.346 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.346 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.346 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.346 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.347 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.348 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.348 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.348 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.349 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.350 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.350 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.350 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.350 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.350 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.351 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.351 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.351 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.352 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.352 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.352 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.352 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.353 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.353 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.353 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.353 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.354 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.354 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.354 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.355 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.355 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.355 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.356 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.356 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.357 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.358 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.358 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.358 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.359 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.359 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.359 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.359 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.360 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.360 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.361 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.362 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.362 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.362 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.363 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.363 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.363 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.364 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.364 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.365 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.365 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.367 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.368 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.368 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.368 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.368 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.369 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.369 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.370 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.370 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.370 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.370 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.370 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.370 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.371 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.371 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.372 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.372 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.372 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.372 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.373 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.373 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.373 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.373 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.373 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.374 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.374 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.375 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.375 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.375 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.376 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.376 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.377 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.377 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.377 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.377 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.378 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.378 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.379 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.379 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.379 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.380 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.380 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.380 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.381 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.381 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.381 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.381 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.382 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.382 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.382 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.382 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.382 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.383 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.383 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.383 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.383 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.383 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.383 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.384 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.384 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.384 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.384 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.384 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.385 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.385 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.385 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.385 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.385 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.386 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.386 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.386 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.386 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.386 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.386 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.386 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.387 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.387 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.387 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.387 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.387 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.388 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.388 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.388 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.388 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.388 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.388 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.388 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.388 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.389 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.389 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.390 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.390 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.390 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.390 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.390 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.390 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.390 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.390 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.390 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.390 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.391 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.392 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.392 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.392 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.392 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.392 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.392 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.393 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.393 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.393 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.393 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.393 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.394 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.394 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.394 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.394 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.394 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.394 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.395 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.395 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.395 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.395 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.396 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.397 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.397 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.398 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.398 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.400 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.400 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.401 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.401 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.402 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.402 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.402 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.402 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.404 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.404 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.404 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.404 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.405 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.405 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.405 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.406 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.406 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.406 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.407 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.407 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.408 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.409 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.409 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.409 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.409 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.411 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.411 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.411 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.412 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.412 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.412 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.412 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.413 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.413 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.413 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.414 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.414 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.415 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.415 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.415 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.416 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.416 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.417 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.417 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.417 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.417 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.418 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.418 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.419 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.419 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.419 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.420 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.420 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.420 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.421 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.421 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.421 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.421 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.421 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.422 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.422 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.422 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.422 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.422 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.423 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.423 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.423 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.424 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.424 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.424 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.424 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.424 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.425 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.426 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.426 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.426 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.427 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.427 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.427 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.427 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.427 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.428 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.428 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.428 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.428 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.429 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.429 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.429 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.429 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.429 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.430 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.430 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.430 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.430 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.430 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.431 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.431 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.431 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.431 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.431 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.431 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: Language server EOF
+13:48:28.432 [Thread-5 (_listen_stderr)] ERROR   thonny.lsp_proxy: Language server STDERR: 
+13:48:28.432 [Thread-4 (_listen_stdout)] INFO    thonny.lsp_proxy: _listen_stdout done
+13:48:28.432 [Thread-5 (_listen_stderr)] INFO    thonny.lsp_proxy: _listen_stderr done
+13:48:28.529 [MainThread] INFO    thonny.lsp_proxy: Termination completed normally
+13:48:28.530 [MainThread] INFO    thonny.workbench: Shutting down language server <thonny.plugins.ruff.RuffProxy object at 0x00000229239D1F50>
+13:48:28.532 [MainThread] WARNING thonny.lsp_proxy: Language server already closed
+13:48:28.534 [MainThread] INFO    thonny.plugins.event_logging: Closing event log
+13:48:28.540 [MainThread] INFO    thonny.plugins.event_logging: Events will be saved to 'D:\\code\\BBCode\\.thonny\\default\\user_logs\\2026-03-26_13-48-02__2026-03-26_13-48-28.jsonl.gz'
+13:48:28.569 [MainThread] INFO    thonny.running: Destroying backend
+13:48:28.570 [MainThread] INFO    thonny.running: Trying to terminate backend process
+13:48:28.584 [Thread-2 (_listen_stdout)] INFO    thonny.running: Reader got EOF
+13:48:28.584 [Thread-3 (_listen_stderr)] INFO    thonny.running: Reached end of STDERR
+13:48:28.593 [MainThread] INFO    thonny.running: Terminated in 0.02 seconds
+13:48:28.595 [MainThread] INFO    thonny.shell: BaseShellText._on_backend_terminated
+13:48:28.597 [MainThread] ERROR   thonny.tktextext: [_dispatch_tk_operation] operation: index, args:('output_end',)
+Traceback (most recent call last):
+  File "D:\code\BBCode\thonny\tktextext.py", line 52, in _dispatch_tk_operation
+    return self.tk.call((self._original_widget_name, operation) + args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: bad text index "output_end"
+13:48:28.600 [MainThread] ERROR   thonny.tktextext: [_dispatch_tk_operation] operation: tag, args:('add', 'inactive', '1.0', '')
+Traceback (most recent call last):
+  File "D:\code\BBCode\thonny\tktextext.py", line 52, in _dispatch_tk_operation
+    return self.tk.call((self._original_widget_name, operation) + args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: bad text index ""
+13:48:28.604 [MainThread] ERROR   thonny.tktextext: [_dispatch_tk_operation] operation: tag, args:('prevrange', 'value', '')
+Traceback (most recent call last):
+  File "D:\code\BBCode\thonny\tktextext.py", line 52, in _dispatch_tk_operation
+    return self.tk.call((self._original_widget_name, operation) + args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: bad text index ""
+13:48:28.607 [MainThread] ERROR   thonny.tktextext: [_dispatch_tk_operation] operation: tag, args:('remove', 'value', '1.0', '')
+Traceback (most recent call last):
+  File "D:\code\BBCode\thonny\tktextext.py", line 52, in _dispatch_tk_operation
+    return self.tk.call((self._original_widget_name, operation) + args)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_tkinter.TclError: bad text index ""
+13:48:28.608 [MainThread] ERROR   thonny.workbench: Problem when handling 'BackendTerminated'
+Traceback (most recent call last):
+  File "D:\code\BBCode\thonny\workbench.py", line 2312, in event_generate
+    handler(event)
+  File "D:\code\BBCode\thonny\shell.py", line 1579, in _on_backend_terminated
+    self._invalidate_current_data()
+  File "D:\code\BBCode\thonny\shell.py", line 1730, in _invalidate_current_data
+    while len(self.active_extra_tags) > 0:
+              ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'ShellText' object has no attribute 'active_extra_tags'
+13:48:28.994 [MainThread] INFO    thonny.shell_threading: AsyncShellRenderer 已停止
+13:48:29.009 [MainThread] ERROR   thonny.workbench: Can't remove binding for 'WorkbenchReady' and 'None'
+Traceback (most recent call last):
+  File "D:\code\BBCode\thonny\workbench.py", line 2345, in unbind
+    self._event_handlers[sequence].remove(func)
+KeyError: None
+13:48:29.220 [MainThread] INFO    thonny.running: Destroying backend
