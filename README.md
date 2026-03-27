@@ -6,27 +6,49 @@
 
 ### 代码编辑器
 - ✅ 行号显示
-- ✅ Python 语法高亮
-- ✅ 实时语法检查（红色下划线标记错误）
+- ✅ Python 语法高亮（关键字、字符串、注释、函数、数字等）
+- ✅ 实时语法检查（红色下划线标记错误行）
 - ✅ 多标签页编辑
-- ✅ 自动保存历史
+- ✅ 中文右键菜单（撤销、重做、剪切、复制、粘贴、删除、全选）
+- ✅ 支持多种文件类型（.py, .txt, .json, .csv, .bat, .ps1, .md 等）
 
 ### 文件浏览器
 - ✅ 树形文件浏览
 - ✅ 上一级文件夹导航
 - ✅ 双击打开文件
 - ✅ 路径显示
+- ✅ 工具栏图标
 
 ### AI 助手
 - ✅ Ollama 本地模型支持
+- ✅ **上下文记忆** - 支持连续对话，记住之前的对话内容
+- ✅ **对话管理** - 清空对话、保存/加载对话历史
+- ✅ **代码一键复制** - 代码块右上角显示复制按钮
 - ✅ 流式实时响应
 - ✅ 消息气泡界面
 - ✅ 代码块高亮
+- ✅ 强制中文回复
+- ✅ 多行输入（Ctrl+Enter 发送）
 
 ### 终端
-- ✅ Python Shell
-- ✅ 系统命令执行
-- ✅ 命令历史
+- ✅ 使用 QProcess 运行真实 Python 解释器
+- ✅ 实时捕获所有输出
+- ✅ Python / 系统命令双模式
+- ✅ 命令历史（上下键导航）
+- ✅ 进程重启功能
+
+### 设置
+- ✅ 设置对话框（Ctrl+,）
+- ✅ 通用设置（默认文件夹、自动保存、启动动画）
+- ✅ AI 设置（Ollama 地址、默认模型、回复语言）
+- ✅ 编辑器设置（字体大小、Tab 宽度、行号、语法检查）
+
+### 界面
+- ✅ 深色主题
+- ✅ 启动动画
+- ✅ 工具栏图标
+- ✅ 可拖拽布局
+- ✅ 自动保存布局状态
 
 ## 项目结构
 
@@ -36,23 +58,35 @@ BBCode/
 │   ├── __init__.py        # 包初始化
 │   ├── editor.py          # 代码编辑器（行号、语法高亮、语法检查）
 │   ├── filebrowser.py     # 文件浏览器
-│   ├── terminal.py        # 终端组件
-│   ├── ai_chat.py         # AI 聊天组件
+│   ├── terminal.py        # 终端组件（QProcess）
+│   ├── ai_chat.py         # AI 聊天组件（上下文记忆、对话管理、代码复制）
+│   ├── splash_screen.py   # 启动动画
+│   ├── settings_dialog.py # 设置对话框
+│   ├── logger.py          # 日志系统
 │   └── main_window.py     # 主窗口
-├── main.py                # 程序入口
+├── launcher.py            # 程序入口
+├── BBCode.bat             # 启动脚本（控制台）
+├── BBCodew.bat            # 启动脚本（无窗口）
+├── installer.nsi          # NSIS 安装脚本
 └── README.md              # 说明文档
 ```
 
 ## 运行方式
 
-### 使用系统 Python
+### 方式 1: 使用 launcher
 ```bash
-python main.py
+python launcher.py
 ```
 
-### 使用项目内置 Python
+### 方式 2: 使用批处理
 ```bash
-python\python.exe main.py
+BBCode.bat        # 带控制台窗口
+BBCodew.bat       # 无控制台窗口
+```
+
+### 方式 3: 使用内置 Python
+```bash
+python\python.exe launcher.py
 ```
 
 ## 快捷键
@@ -68,22 +102,28 @@ python\python.exe main.py
 | Ctrl+X | 剪切 |
 | Ctrl+C | 复制 |
 | Ctrl+V | 粘贴 |
+| Ctrl+A | 全选 |
+| Ctrl+, | 打开设置 |
 | F5 | 运行代码 |
 | Ctrl+Enter | AI 聊天发送 |
 
 ## AI 助手使用
 
-1. 确保已安装并启动 Ollama:
-   ```bash
-   ollama serve
-   ```
+### 1. 安装并启动 Ollama
+```bash
+ollama serve
+```
 
-2. 下载推荐模型:
-   ```bash
-   ollama pull qwen2.5-coder:7b
-   ```
+### 2. 下载推荐模型
+```bash
+ollama pull qwen2.5-coder:7b
+```
 
-3. 启动 BBCode，AI 助手会自动连接 Ollama
+### 3. 使用 AI 助手
+- 启动 BBCode，AI 助手会自动连接 Ollama
+- 支持连续对话，AI 会记住之前的对话内容
+- 点击「对话管理」可以清空、保存或加载对话历史
+- 代码块右上角有「复制」按钮，一键复制代码
 
 ## 依赖
 
@@ -95,12 +135,26 @@ python\python.exe main.py
 pip install PyQt6
 ```
 
+## 打包安装
+
+使用 NSIS 创建安装程序:
+```bash
+"D:\app\windows\NSIS\makensis.exe" installer.nsi
+```
+
 ## 版本历史
 
-### v3.0.0
+### v2.0.2.1
 - 重构项目结构，精简代码
-- 整合所有功能到核心模块
-- 优化性能和用户体验
+- 使用 QProcess 重写终端组件
+- 添加设置对话框
+- 添加启动动画
+- 支持更多文件类型
+- 优化 AI 助手中文回复
+- 美化界面图标
+- **新增**: AI 助手上下文记忆功能
+- **新增**: AI 助手对话管理（清空、保存、加载）
+- **新增**: 代码块一键复制功能
 
 ## 许可证
 

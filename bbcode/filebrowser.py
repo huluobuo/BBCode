@@ -8,10 +8,10 @@ from typing import Optional
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QTreeView, QLabel,
-    QPushButton
+    QPushButton, QToolButton
 )
 from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QFileSystemModel
+from PyQt6.QtGui import QFileSystemModel, QIcon
 
 
 class FileExplorer(QWidget):
@@ -37,8 +37,10 @@ class FileExplorer(QWidget):
         toolbar.setContentsMargins(8, 4, 8, 4)
         toolbar.setSpacing(4)
         
-        self._up_btn = QPushButton("⬆ 上一级")
-        self._up_btn.setFixedHeight(28)
+        self._up_btn = QToolButton()
+        self._up_btn.setIcon(QIcon("res/nav-backward.png"))
+        self._up_btn.setToolTip("上一级")
+        self._up_btn.setFixedSize(28, 28)
         self._up_btn.clicked.connect(self._go_to_parent)
         toolbar.addWidget(self._up_btn)
         
@@ -47,9 +49,10 @@ class FileExplorer(QWidget):
         self._path_label.setWordWrap(True)
         toolbar.addWidget(self._path_label, 1)
         
-        refresh_btn = QPushButton("🔄")
-        refresh_btn.setFixedSize(28, 28)
+        refresh_btn = QToolButton()
+        refresh_btn.setIcon(QIcon("res/clock.png"))
         refresh_btn.setToolTip("刷新")
+        refresh_btn.setFixedSize(28, 28)
         refresh_btn.clicked.connect(self._refresh)
         toolbar.addWidget(refresh_btn)
         
@@ -125,4 +128,10 @@ class FileExplorer(QWidget):
         if self._model.isDir(index):
             self.set_root_path(path)
         else:
-            self.file_double_clicked.emit(path)
+            # 检查是否是可编辑的文件类型
+            editable_extensions = {'.py', '.txt', '.json', '.csv', '.bat', '.ps1', '.md', '.xml', '.yaml', '.yml', '.ini', '.cfg', '.log'}
+            media_extensions = {'.png', '.jpg', '.jpeg', '.gif', '.bmp', '.mp3', '.mp4', '.wav', '.avi', '.mkv'}
+            
+            file_ext = Path(path).suffix.lower()
+            if file_ext in editable_extensions or file_ext in media_extensions:
+                self.file_double_clicked.emit(path)

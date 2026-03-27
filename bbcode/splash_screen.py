@@ -10,6 +10,10 @@ from PyQt6.QtWidgets import (
 from PyQt6.QtCore import Qt, QTimer, pyqtSignal, QSize
 from PyQt6.QtGui import QColor, QFont, QPainter, QBrush, QLinearGradient, QPixmap, QIcon
 
+from bbcode.logger import get_logger
+
+log = get_logger("SplashScreen")
+
 
 class SplashScreen(QWidget):
     """启动动画窗口"""
@@ -136,7 +140,7 @@ class SplashScreen(QWidget):
         layout.addWidget(self._progress_bar)
         
         # 版本标签
-        self._version_label = QLabel("v3.0.0")
+        self._version_label = QLabel("v2.0.2.1")
         self._version_label.setStyleSheet("""
             QLabel {
                 color: #858585;
@@ -160,6 +164,7 @@ class SplashScreen(QWidget):
         if self._current_step < len(self._loading_steps):
             step_text = self._loading_steps[self._current_step]
             self._status_label.setText(step_text)
+            log.info(step_text)
             
             progress = int((self._current_step + 1) / len(self._loading_steps) * 100)
             self._progress_bar.setValue(progress)
@@ -168,6 +173,7 @@ class SplashScreen(QWidget):
         else:
             # 加载完成
             self._timer.stop()
+            log.info("启动动画完成")
             QTimer.singleShot(500, self._finish)
     
     def _finish(self):

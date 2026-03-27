@@ -23,6 +23,11 @@ from bbcode.filebrowser import FileExplorer
 from bbcode.terminal import Terminal
 from bbcode.ai_chat import AIChat
 from bbcode.splash_screen import show_splash_screen
+from bbcode.settings_dialog import SettingsDialog
+from bbcode.logger import get_logger
+
+# 获取日志记录器
+log = get_logger("MainWindow")
 
 
 class MainWindow(QMainWindow):
@@ -30,6 +35,8 @@ class MainWindow(QMainWindow):
     
     def __init__(self):
         super().__init__()
+        
+        log.info("初始化主窗口...")
         
         self.setWindowTitle("BBCode - Python IDE")
         self.setGeometry(100, 100, 1600, 1000)
@@ -43,6 +50,8 @@ class MainWindow(QMainWindow):
         self._setup_dock_widgets()
         
         self._load_settings()
+        
+        log.info("主窗口初始化完成")
     
     def _setup_ui(self):
         """设置主UI"""
@@ -147,6 +156,14 @@ class MainWindow(QMainWindow):
         self._show_file_explorer_action.setChecked(True)
         view_menu.addAction(self._show_file_explorer_action)
         
+        # 设置菜单
+        settings_menu = menubar.addMenu("设置(&S)")
+        
+        settings_action = QAction("首选项...", self)
+        settings_action.setShortcut("Ctrl+,")
+        settings_action.triggered.connect(self._show_settings)
+        settings_menu.addAction(settings_action)
+        
         self._show_ai_chat_action = QAction("AI 助手", self)
         self._show_ai_chat_action.setCheckable(True)
         self._show_ai_chat_action.setChecked(True)
@@ -173,28 +190,53 @@ class MainWindow(QMainWindow):
     def _setup_toolbar(self):
         """设置工具栏"""
         toolbar = QToolBar("主工具栏")
+        toolbar.setObjectName("mainToolbar")
+        toolbar.setIconSize(QSize(24, 24))
+        toolbar.setStyleSheet("""
+            QToolBar {
+                background-color: #2d2d30;
+                border: none;
+                spacing: 5px;
+                padding: 5px;
+            }
+            QToolButton {
+                background-color: transparent;
+                border: none;
+                padding: 5px;
+                border-radius: 4px;
+            }
+            QToolButton:hover {
+                background-color: #3c3c3c;
+            }
+            QToolButton:pressed {
+                background-color: #007acc;
+            }
+        """)
         self.addToolBar(toolbar)
         
         # 文件操作
-        new_btn = QPushButton("新建")
-        new_btn.clicked.connect(self._new_file)
-        toolbar.addWidget(new_btn)
+        new_action = QAction(QIcon("res/new-file.png"), "新建", self)
+        new_action.setShortcut(QKeySequence.StandardKey.New)
+        new_action.triggered.connect(self._new_file)
+        toolbar.addAction(new_action)
         
-        open_btn = QPushButton("打开")
-        open_btn.clicked.connect(self._open_file)
-        toolbar.addWidget(open_btn)
+        open_action = QAction(QIcon("res/open-file.png"), "打开", self)
+        open_action.setShortcut(QKeySequence.StandardKey.Open)
+        open_action.triggered.connect(self._open_file)
+        toolbar.addAction(open_action)
         
-        save_btn = QPushButton("保存")
-        save_btn.clicked.connect(self._save_file)
-        toolbar.addWidget(save_btn)
+        save_action = QAction(QIcon("res/save-file.png"), "保存", self)
+        save_action.setShortcut(QKeySequence.StandardKey.Save)
+        save_action.triggered.connect(self._save_file)
+        toolbar.addAction(save_action)
         
         toolbar.addSeparator()
         
         # 运行操作
-        run_btn = QPushButton("▶ 运行")
-        run_btn.setStyleSheet("background-color: #4ec9b0; color: white;")
-        run_btn.clicked.connect(self._run_code)
-        toolbar.addWidget(run_btn)
+        run_action = QAction(QIcon("res/run-current-script.png"), "运行", self)
+        run_action.setShortcut("F5")
+        run_action.triggered.connect(self._run_code)
+        toolbar.addAction(run_action)
         
         toolbar.addSeparator()
         
@@ -222,6 +264,7 @@ class MainWindow(QMainWindow):
         # 文件浏览器
         self._file_explorer = FileExplorer()
         self._file_dock = QDockWidget("文件浏览器", self)
+        self._file_dock.setObjectName("fileDock")
         self._file_dock.setWidget(self._file_explorer)
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self._file_dock)
         
@@ -232,6 +275,7 @@ class MainWindow(QMainWindow):
         # AI 聊天
         self._ai_chat = AIChat()
         self._ai_dock = QDockWidget("AI 助手", self)
+        self._ai_dock.setObjectName("aiDock")
         self._ai_dock.setWidget(self._ai_chat)
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self._ai_dock)
         
@@ -241,6 +285,7 @@ class MainWindow(QMainWindow):
         # 终端
         self._terminal = Terminal()
         self._terminal_dock = QDockWidget("终端", self)
+        self._terminal_dock.setObjectName("terminalDock")
         self._terminal_dock.setWidget(self._terminal)
         self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self._terminal_dock)
         
@@ -304,6 +349,7 @@ class MainWindow(QMainWindow):
     
     def closeEvent(self, event: QCloseEvent):
         """关闭事件处理"""
+        log.info("应用程序关闭")
         self._save_settings()
         event.accept()
     
@@ -311,15 +357,31 @@ class MainWindow(QMainWindow):
     
     def _new_file(self):
         """新建文件"""
+        log.info("创建新文件")
         self._editor_tabs.create_new_tab()
     
     def _open_file(self):
         """打开文件"""
         file_path, _ = QFileDialog.getOpenFileName(
             self, "打开文件", "",
-            "Python files (*.py);;Text files (*.txt);;All files (*.*)"
+            "Python files (*.py);;"
+            "Text files (*.txt);;"
+            "JSON files (*.json);;"
+            "CSV files (*.csv);;"
+            "Batch files (*.bat *.cmd);;"
+            "PowerShell files (*.ps1);;"
+            "Markdown files (*.md);;"
+            "XML files (*.xml);;"
+            "YAML files (*.yaml *.yml);;"
+            "Config files (*.ini *.cfg);;"
+            "Log files (*.log);;"
+            "Image files (*.png *.jpg *.jpeg *.gif *.bmp);;"
+            "Audio files (*.mp3 *.wav);;"
+            "Video files (*.mp4 *.avi *.mkv);;"
+            "All files (*.*)"
         )
         if file_path:
+            log.info(f"打开文件: {file_path}")
             self._editor_tabs.open_file(file_path)
     
     def _open_folder(self):
@@ -331,6 +393,7 @@ class MainWindow(QMainWindow):
     def _save_file(self):
         """保存文件"""
         if self._editor_tabs.save_current_file():
+            log.info("文件已保存")
             self._statusbar.showMessage("文件已保存", 3000)
     
     def _save_file_as(self):
@@ -340,8 +403,17 @@ class MainWindow(QMainWindow):
     
     def _on_file_explorer_double_click(self, file_path: str):
         """文件浏览器双击处理"""
-        if file_path.endswith('.py'):
+        # 支持的可编辑文件类型
+        editable_extensions = {'.py', '.txt', '.json', '.csv', '.bat', '.cmd', '.ps1', '.md', '.xml', '.yaml', '.yml', '.ini', '.cfg', '.log'}
+        # 媒体文件类型（可以查看但不一定能编辑）
+        media_extensions = {'.png', '.jpg', '.jpeg', '.gif', '.bmp', '.mp3', '.wav', '.mp4', '.avi', '.mkv'}
+        
+        file_ext = Path(file_path).suffix.lower()
+        if file_ext in editable_extensions:
             self._editor_tabs.open_file(file_path)
+        elif file_ext in media_extensions:
+            # 媒体文件显示提示，未来可以添加预览功能
+            self._statusbar.showMessage(f"媒体文件: {file_path} (预览功能开发中)", 5000)
     
     def _on_file_saved(self, file_path: str):
         """文件保存处理"""
@@ -390,6 +462,14 @@ class MainWindow(QMainWindow):
             # 这里可以添加实际的代码运行逻辑
             self._statusbar.showMessage("运行功能待实现", 3000)
     
+    # ==================== 设置操作 ====================
+    
+    def _show_settings(self):
+        """显示设置对话框"""
+        log.info("打开设置对话框")
+        dialog = SettingsDialog(self)
+        dialog.exec()
+    
     # ==================== 帮助操作 ====================
     
     def _show_about(self):
@@ -399,7 +479,7 @@ class MainWindow(QMainWindow):
             "关于 BBCode",
             "<h2>BBCode Python IDE</h2>"
             "<p>基于 PyQt6 的现代化 Python IDE</p>"
-            "<p>版本: 3.0.0</p>"
+            "<p>版本: 2.0.2.1</p>"
         )
 
 

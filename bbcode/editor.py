@@ -146,6 +146,10 @@ class CodeEditor(QPlainTextEdit):
         self._syntax_check_timer.timeout.connect(self._check_syntax)
         self._syntax_check_timer.setSingleShot(True)
         
+        # 启用自定义上下文菜单
+        self.setContextMenuPolicy(Qt.ContextMenuPolicy.CustomContextMenu)
+        self.customContextMenuRequested.connect(self._show_context_menu)
+        
         self._highlight_current_line()
     
     def line_number_area_width(self):
@@ -302,6 +306,64 @@ class CodeEditor(QPlainTextEdit):
         except Exception as e:
             QMessageBox.critical(self, "错误", f"无法保存文件: {str(e)}")
             return False
+    
+    def _show_context_menu(self, position):
+        """显示自定义右键菜单"""
+        from PyQt6.QtWidgets import QMenu
+        
+        menu = QMenu(self)
+        
+        # 撤销
+        undo_action = menu.addAction("撤销")
+        undo_action.setShortcut("Ctrl+Z")
+        undo_action.triggered.connect(self.undo)
+        undo_action.setEnabled(self.isUndoAvailable())
+        
+        # 重做
+        redo_action = menu.addAction("重做")
+        redo_action.setShortcut("Ctrl+Y")
+        redo_action.triggered.connect(self.redo)
+        redo_action.setEnabled(self.isRedoAvailable())
+        
+        menu.addSeparator()
+        
+        # 剪切
+        cut_action = menu.addAction("剪切")
+        cut_action.setShortcut("Ctrl+X")
+        cut_action.triggered.connect(self.cut)
+        cut_action.setEnabled(self.textCursor().hasSelection())
+        
+        # 复制
+        copy_action = menu.addAction("复制")
+        copy_action.setShortcut("Ctrl+C")
+        copy_action.triggered.connect(self.copy)
+        copy_action.setEnabled(self.textCursor().hasSelection())
+        
+        # 粘贴
+        paste_action = menu.addAction("粘贴")
+        paste_action.setShortcut("Ctrl+V")
+        paste_action.triggered.connect(self.paste)
+        
+        menu.addSeparator()
+        
+        # 删除
+        delete_action = menu.addAction("删除")
+        delete_action.triggered.connect(self._delete_selection)
+        delete_action.setEnabled(self.textCursor().hasSelection())
+        
+        menu.addSeparator()
+        
+        # 全选
+        select_all_action = menu.addAction("全选")
+        select_all_action.setShortcut("Ctrl+A")
+        select_all_action.triggered.connect(self.selectAll)
+        
+        menu.exec(self.mapToGlobal(position))
+    
+    def _delete_selection(self):
+        """删除选中内容"""
+        cursor = self.textCursor()
+        cursor.removeSelectedText()
 
 
 # ============== 编辑器标签页 ==============

@@ -1,4 +1,4 @@
-﻿; NSIS Installation Script for BBCode
+; NSIS Installation Script for BBCode
 ; NSIS Installer for BBCode
 
 ; Include Modern UI
@@ -8,10 +8,10 @@
 !define APPNAME "BBCode"
 !define COMPANYNAME "huluobuo"
 !define DESCRIPTION "BBCode - Python IDE"
-!define VERSIONMAJOR 3
+!define VERSIONMAJOR 2
 !define VERSIONMINOR 0
-!define VERSIONBUILD 0
-!define VERSIONPATCH 0
+!define VERSIONBUILD 2
+!define VERSIONPATCH 1
 !define HELPURL "https://github.com/huluobuo/BBCode"
 !define UPDATEURL "https://github.com/huluobuo/BBCode/releases"
 !define ABOUTURL "https://github.com/huluobuo/BBCode"

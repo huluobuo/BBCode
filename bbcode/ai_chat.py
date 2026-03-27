@@ -1,34 +1,65 @@
 # -*- coding: utf-8 -*-
 """
 BBCode AI 聊天组件
-支持 Ollama 本地模型
+支持 Ollama 本地模型，支持上下文记忆和对话管理
+使用 /api/chat 接口进行原生对话
 """
 
 import json
 import urllib.request
 import urllib.error
-import threading
+import os
+import re
+from datetime import datetime
 from typing import Optional, List, Dict, Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 
 from PyQt6.QtWidgets import (
     QWidget, QVBoxLayout, QHBoxLayout, QTextEdit, QLineEdit,
     QPushButton, QLabel, QComboBox, QScrollArea, QFrame,
-    QSizePolicy, QApplication
+    QSizePolicy, QApplication, QFileDialog, QMessageBox, QMenu,
+    QTextBrowser
 )
-from PyQt6.QtCore import Qt, pyqtSignal, QThread, QTimer
-from PyQt6.QtGui import QFont, QColor
+from PyQt6.QtCore import Qt, pyqtSignal, QThread, QTimer, QUrl
+from PyQt6.QtGui import QFont, QColor, QAction, QClipboard
 
 
 @dataclass
 class Message:
     """聊天消息"""
-    role: str  # "user" or "assistant"
+    role: str  # "user", "assistant", or "system"
     content: str
+    timestamp: Optional[str] = None
+    
+    def __post_init__(self):
+        if self.timestamp is None:
+            self.timestamp = datetime.now().isoformat()
+    
+    def to_dict(self) -> dict:
+        return {
+            "role": self.role,
+            "content": self.content,
+            "timestamp": self.timestamp
+        }
+    
+    def to_api_format(self) -> dict:
+        """转换为 API 格式（仅 role 和 content）"""
+        return {
+            "role": self.role,
+            "content": self.content
+        }
+    
+    @classmethod
+    def from_dict(cls, data: dict) -> 'Message':
+        return cls(
+            role=data.get("role", ""),
+            content=data.get("content", ""),
+            timestamp=data.get("timestamp")
+        )
 
 
 class OllamaAPI:
-    """Ollama API 客户端"""
+    """Ollama API 客户端 - 使用 /api/chat 接口"""
     
     def __init__(self, host: str = "http://localhost:11434"):
         self.host = host
@@ -62,21 +93,37 @@ class OllamaAPI:
             print(f"Error listing models: {e}")
             return []
     
-    def generate_stream(self, prompt: str, model: Optional[str] = None, 
-                        system: Optional[str] = None) -> str:
-        """流式生成文本"""
+    def chat_stream(self, messages: List[Message], model: Optional[str] = None,
+                    system: Optional[str] = None) -> str:
+        """
+        使用 /api/chat 接口进行流式对话
+        messages: 对话历史消息列表
+        """
         model = model or self.default_model
+        
+        # 构建 messages 数组（限制上下文长度）
+        max_context = 20  # 最多保留20条消息
+        recent_messages = messages[-max_context:] if len(messages) > max_context else messages
+        
+        # 转换为 API 格式
+        api_messages = [msg.to_api_format() for msg in recent_messages]
+        
+        # 如果有 system 提示且第一条不是 system，则插入
+        if system and (not api_messages or api_messages[0].get("role") != "system"):
+            api_messages.insert(0, {"role": "system", "content": system})
         
         data = {
             "model": model,
-            "prompt": prompt,
-            "stream": True
+            "messages": api_messages,
+            "stream": True,
+            "options": {
+                "temperature": 0.7,
+                "num_ctx": 4096  # 上下文窗口大小
+            }
         }
-        if system:
-            data["system"] = system
         
         req = urllib.request.Request(
-            f"{self.host}/api/generate",
+            f"{self.host}/api/chat",
             data=json.dumps(data).encode('utf-8'),
             headers={"Content-Type": "application/json"},
             method="POST"
@@ -87,8 +134,8 @@ class OllamaAPI:
                 if line:
                     try:
                         chunk = json.loads(line.decode('utf-8'))
-                        if 'response' in chunk:
-                            yield chunk['response']
+                        if 'message' in chunk and 'content' in chunk['message']:
+                            yield chunk['message']['content']
                         if chunk.get('done'):
                             break
                     except json.JSONDecodeError:
@@ -102,18 +149,19 @@ class AIChatWorker(QThread):
     message_complete = pyqtSignal()
     error_occurred = pyqtSignal(str)
     
-    def __init__(self, api: OllamaAPI, model: str, prompt: str, system: Optional[str] = None):
+    def __init__(self, api: OllamaAPI, model: str, messages: List[Message],
+                 system: Optional[str] = None):
         super().__init__()
         self.api = api
         self.model = model
-        self.prompt = prompt
+        self.messages = messages
         self.system = system
         self._running = True
     
     def run(self):
         """运行生成"""
         try:
-            for chunk in self.api.generate_stream(self.prompt, self.model, self.system):
+            for chunk in self.api.chat_stream(self.messages, self.model, self.system):
                 if not self._running:
                     break
                 self.message_chunk.emit(chunk)
@@ -126,89 +174,252 @@ class AIChatWorker(QThread):
         self._running = False
 
 
+class CodeBlockWidget(QFrame):
+    """代码块组件 - 带复制按钮"""
+    
+    def __init__(self, language: str, code: str, parent=None):
+        super().__init__(parent)
+        self._code = code
+        self._language = language or "text"
+        self._setup_ui()
+    
+    def _setup_ui(self):
+        self.setStyleSheet("""
+            CodeBlockWidget {
+                background-color: #1e1e1e;
+                border-radius: 8px;
+                border: 1px solid #333;
+            }
+        """)
+        
+        layout = QVBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        
+        # 顶部栏 - 语言标签和复制按钮
+        header = QWidget()
+        header.setStyleSheet("""
+            QWidget {
+                background-color: #252526;
+                border-top-left-radius: 8px;
+                border-top-right-radius: 8px;
+                border-bottom: 1px solid #333;
+            }
+        """)
+        header_layout = QHBoxLayout(header)
+        header_layout.setContentsMargins(12, 8, 12, 8)
+        
+        lang_label = QLabel(self._language.upper())
+        lang_label.setStyleSheet("color: #858585; font-size: 11px; font-family: monospace;")
+        header_layout.addWidget(lang_label)
+        
+        header_layout.addStretch()
+        
+        copy_btn = QPushButton("📋 复制")
+        copy_btn.setCursor(Qt.CursorShape.PointingHandCursor)
+        copy_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #3c3c3c;
+                color: #4ec9b0;
+                border: none;
+                border-radius: 4px;
+                padding: 4px 10px;
+                font-size: 12px;
+            }
+            QPushButton:hover {
+                background-color: #4c4c4c;
+            }
+        """)
+        copy_btn.clicked.connect(self._copy_code)
+        header_layout.addWidget(copy_btn)
+        
+        layout.addWidget(header)
+        
+        # 代码内容 - 使用 QTextBrowser 显示
+        self._code_browser = QTextBrowser()
+        self._code_browser.setStyleSheet("""
+            QTextBrowser {
+                background-color: #1e1e1e;
+                color: #d4d4d4;
+                border: none;
+                border-bottom-left-radius: 8px;
+                border-bottom-right-radius: 8px;
+                padding: 12px;
+                font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+                font-size: 13px;
+                line-height: 1.5;
+            }
+        """)
+        self._code_browser.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
+        self._code_browser.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        
+        # 转义代码显示
+        escaped_code = self._code.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+        self._code_browser.setHtml(f"<pre style='margin:0; white-space:pre-wrap; word-wrap:break-word;'>{escaped_code}</pre>")
+        
+        # 设置代码区域的最大高度
+        self._code_browser.setMaximumHeight(400)
+        
+        layout.addWidget(self._code_browser)
+    
+    def _copy_code(self):
+        """复制代码到剪贴板"""
+        clipboard = QApplication.clipboard()
+        clipboard.setText(self._code)
+
+
 class MessageBubble(QFrame):
-    """消息气泡组件"""
+    """消息气泡组件 - 支持代码复制"""
+    
+    copy_code_requested = pyqtSignal(str)
     
     def __init__(self, role: str, content: str, parent=None):
         super().__init__(parent)
         
         self._role = role
         self._content = content
+        self._code_blocks: List[CodeBlockWidget] = []
         
         self._setup_ui()
     
     def _setup_ui(self):
         layout = QHBoxLayout(self)
         layout.setContentsMargins(10, 5, 10, 5)
+        layout.setSpacing(0)
         
-        # 消息内容
-        self._content_label = QLabel()
-        self._content_label.setWordWrap(True)
-        self._content_label.setTextInteractionFlags(
-            Qt.TextInteractionFlag.TextSelectableByMouse
-        )
+        # 创建垂直布局容器
+        self._content_widget = QWidget()
+        self._content_layout = QVBoxLayout(self._content_widget)
+        self._content_layout.setContentsMargins(12, 10, 12, 10)
+        self._content_layout.setSpacing(8)
+        self._content_layout.setAlignment(Qt.AlignmentFlag.AlignTop)
         
+        # 设置样式
         if self._role == "user":
-            self._content_label.setStyleSheet("""
-                QLabel {
+            self._content_widget.setStyleSheet("""
+                QWidget {
                     background-color: #007acc;
                     color: white;
-                    padding: 10px;
-                    border-radius: 15px;
+                    border-radius: 16px;
+                }
+                QLabel {
+                    color: white;
+                    font-size: 14px;
+                    line-height: 1.5;
                 }
             """)
             layout.addStretch()
-            layout.addWidget(self._content_label)
+            layout.addWidget(self._content_widget, stretch=1)
         else:
-            self._content_label.setStyleSheet("""
-                QLabel {
+            self._content_widget.setStyleSheet("""
+                QWidget {
                     background-color: #3c3c3c;
                     color: #d4d4d4;
-                    padding: 10px;
-                    border-radius: 15px;
+                    border-radius: 16px;
+                }
+                QLabel {
+                    color: #d4d4d4;
+                    font-size: 14px;
+                    line-height: 1.6;
                 }
             """)
-            layout.addWidget(self._content_label)
+            layout.addWidget(self._content_widget, stretch=1)
             layout.addStretch()
         
-        self._content_label.setText(self._format_content(self._content))
+        self._update_content()
     
-    def _format_content(self, content: str) -> str:
-        """格式化内容（简单处理）"""
-        # 转义 HTML
-        content = content.replace("&", "&amp;")
-        content = content.replace("<", "&lt;")
-        content = content.replace(">", "&gt;")
+    def _update_content(self):
+        """更新显示内容"""
+        # 清除现有内容
+        while self._content_layout.count():
+            item = self._content_layout.takeAt(0)
+            if item.widget():
+                item.widget().deleteLater()
+        self._code_blocks.clear()
         
-        # 处理代码块
-        import re
-        content = re.sub(
-            r'```(\w+)?\n(.*?)```',
-            r'<pre style="background:#1e1e1e;padding:10px;border-radius:5px;overflow-x:auto;"><code>\2</code></pre>',
-            content,
-            flags=re.DOTALL
-        )
+        # 解析内容，分离文本和代码块
+        parts = self._split_content(self._content)
+        
+        for part_type, part_content in parts:
+            if part_type == "text":
+                # 创建文本标签
+                label = QLabel()
+                label.setWordWrap(True)
+                label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+                label.setTextFormat(Qt.TextFormat.RichText)
+                
+                # 格式化文本（处理行内代码和换行）
+                formatted_text = self._format_text(part_content)
+                label.setText(formatted_text)
+                self._content_layout.addWidget(label)
+            
+            elif part_type == "code":
+                # 创建代码块组件
+                language, code = part_content
+                code_widget = CodeBlockWidget(language, code)
+                self._code_blocks.append(code_widget)
+                self._content_layout.addWidget(code_widget)
+    
+    def _split_content(self, content: str) -> List[tuple]:
+        """将内容分割为文本和代码块"""
+        parts = []
+        remaining = content
+        
+        # 正则匹配代码块
+        pattern = r'```(\w+)?\n(.*?)```'
+        
+        while remaining:
+            match = re.search(pattern, remaining, re.DOTALL)
+            if match:
+                # 代码块前的文本
+                if match.start() > 0:
+                    text_part = remaining[:match.start()].strip()
+                    if text_part:
+                        parts.append(("text", text_part))
+                
+                # 代码块
+                lang = match.group(1) or ""
+                code = match.group(2)
+                parts.append(("code", (lang, code)))
+                
+                remaining = remaining[match.end():]
+            else:
+                # 剩余都是文本
+                if remaining.strip():
+                    parts.append(("text", remaining.strip()))
+                break
+        
+        return parts
+    
+    def _format_text(self, text: str) -> str:
+        """格式化文本内容"""
+        # 转义 HTML
+        text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
         
         # 处理行内代码
-        content = re.sub(
+        text = re.sub(
             r'`([^`]+)`',
-            r'<code style="background:#1e1e1e;padding:2px 4px;border-radius:3px;">\1</code>',
-            content
+            r'<code style="background:#2d2d2d;padding:2px 6px;border-radius:4px;color:#dcdcaa;font-family:monospace;font-size:13px;">\1</code>',
+            text
         )
         
         # 处理换行
-        content = content.replace("\n", "<br>")
+        text = text.replace('\n', '<br>')
         
-        return content
+        return text
     
     def append_content(self, text: str):
         """追加内容"""
         self._content += text
-        self._content_label.setText(self._format_content(self._content))
+        self._update_content()
+    
+    def get_content(self) -> str:
+        """获取内容"""
+        return self._content
 
 
 class AIChat(QWidget):
-    """AI 聊天组件"""
+    """AI 聊天组件 - 支持上下文记忆和对话管理"""
     
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -220,6 +431,9 @@ class AIChat(QWidget):
         
         self._setup_ui()
         self._check_ollama()
+        
+        # 尝试加载上次的对话
+        self._load_conversation_history()
     
     def _setup_ui(self):
         layout = QVBoxLayout(self)
@@ -234,6 +448,24 @@ class AIChat(QWidget):
         status_layout.addWidget(self._status_label)
         
         status_layout.addStretch()
+        
+        # 对话管理按钮
+        self._manage_btn = QPushButton("对话管理 ▼")
+        self._manage_btn.setFixedWidth(100)
+        self._manage_btn.setStyleSheet("""
+            QPushButton {
+                background-color: #3c3c3c;
+                color: #d4d4d4;
+                border: 1px solid #555;
+                border-radius: 3px;
+                padding: 3px 8px;
+            }
+            QPushButton:hover {
+                background-color: #4c4c4c;
+            }
+        """)
+        self._manage_btn.clicked.connect(self._show_manage_menu)
+        status_layout.addWidget(self._manage_btn)
         
         # 模型选择
         status_layout.addWidget(QLabel("模型:"))
@@ -342,6 +574,157 @@ class AIChat(QWidget):
                 return True
         return super().eventFilter(obj, event)
     
+    def _show_manage_menu(self):
+        """显示对话管理菜单"""
+        menu = QMenu(self)
+        menu.setStyleSheet("""
+            QMenu {
+                background-color: #3c3c3c;
+                color: #d4d4d4;
+                border: 1px solid #555;
+            }
+            QMenu::item {
+                padding: 5px 20px;
+            }
+            QMenu::item:selected {
+                background-color: #007acc;
+            }
+        """)
+        
+        clear_action = QAction("清空对话", self)
+        clear_action.triggered.connect(self._clear_conversation)
+        menu.addAction(clear_action)
+        
+        save_action = QAction("保存对话", self)
+        save_action.triggered.connect(self._save_conversation)
+        menu.addAction(save_action)
+        
+        load_action = QAction("加载对话", self)
+        load_action.triggered.connect(self._load_conversation)
+        menu.addAction(load_action)
+        
+        menu.exec(self._manage_btn.mapToGlobal(self._manage_btn.rect().bottomLeft()))
+    
+    def _clear_conversation(self):
+        """清空对话"""
+        reply = QMessageBox.question(
+            self, "确认清空",
+            "确定要清空当前对话吗？",
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+        )
+        
+        if reply == QMessageBox.StandardButton.Yes:
+            # 清除消息列表
+            self._messages.clear()
+            
+            # 清除气泡
+            for bubble in self._bubbles:
+                bubble.deleteLater()
+            self._bubbles.clear()
+            
+            # 清除历史文件
+            self._clear_history_file()
+    
+    def _save_conversation(self):
+        """保存对话到文件"""
+        if not self._messages:
+            QMessageBox.information(self, "提示", "当前没有对话内容可保存")
+            return
+        
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "保存对话",
+            os.path.expanduser(f"~/BBCode_对话_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"),
+            "JSON 文件 (*.json)"
+        )
+        
+        if file_path:
+            try:
+                data = {
+                    "version": "1.0",
+                    "saved_at": datetime.now().isoformat(),
+                    "messages": [msg.to_dict() for msg in self._messages]
+                }
+                with open(file_path, 'w', encoding='utf-8') as f:
+                    json.dump(data, f, ensure_ascii=False, indent=2)
+                QMessageBox.information(self, "成功", f"对话已保存到:\n{file_path}")
+            except Exception as e:
+                QMessageBox.critical(self, "错误", f"保存失败:\n{str(e)}")
+    
+    def _load_conversation(self):
+        """从文件加载对话"""
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "加载对话",
+            os.path.expanduser("~"),
+            "JSON 文件 (*.json)"
+        )
+        
+        if file_path:
+            try:
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                
+                # 清除现有对话
+                self._messages.clear()
+                for bubble in self._bubbles:
+                    bubble.deleteLater()
+                self._bubbles.clear()
+                
+                # 加载消息
+                for msg_data in data.get("messages", []):
+                    msg = Message.from_dict(msg_data)
+                    self._messages.append(msg)
+                    self._add_message_bubble(msg.role, msg.content)
+                
+                QMessageBox.information(self, "成功", f"已加载 {len(self._messages)} 条消息")
+            except Exception as e:
+                QMessageBox.critical(self, "错误", f"加载失败:\n{str(e)}")
+    
+    def _get_history_file_path(self) -> str:
+        """获取历史记录文件路径"""
+        config_dir = os.path.expanduser("~/.bbcode")
+        os.makedirs(config_dir, exist_ok=True)
+        return os.path.join(config_dir, "ai_chat_history.json")
+    
+    def _save_conversation_history(self):
+        """自动保存对话历史"""
+        try:
+            file_path = self._get_history_file_path()
+            data = {
+                "version": "1.0",
+                "saved_at": datetime.now().isoformat(),
+                "messages": [msg.to_dict() for msg in self._messages]
+            }
+            with open(file_path, 'w', encoding='utf-8') as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            print(f"保存对话历史失败: {e}")
+    
+    def _load_conversation_history(self):
+        """加载上次的对话历史"""
+        try:
+            file_path = self._get_history_file_path()
+            if os.path.exists(file_path):
+                with open(file_path, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+                
+                for msg_data in data.get("messages", []):
+                    msg = Message.from_dict(msg_data)
+                    self._messages.append(msg)
+                    self._add_message_bubble(msg.role, msg.content)
+        except Exception as e:
+            print(f"加载对话历史失败: {e}")
+    
+    def _clear_history_file(self):
+        """清除历史文件"""
+        try:
+            file_path = self._get_history_file_path()
+            if os.path.exists(file_path):
+                os.remove(file_path)
+        except Exception as e:
+            print(f"清除历史文件失败: {e}")
+    
     def _check_ollama(self):
         """检查 Ollama 状态"""
         if self._api.is_available():
@@ -370,21 +753,30 @@ class AIChat(QWidget):
             return
         
         if not self._api.is_available():
-            self._add_message("assistant", "Ollama 未启动，请先启动 Ollama 服务。")
+            self._add_message_bubble("assistant", "Ollama 未启动，请先启动 Ollama 服务。")
             return
         
-        # 添加用户消息
-        self._add_message("user", text)
+        # 添加用户消息到历史
+        user_msg = Message(role="user", content=text)
+        self._messages.append(user_msg)
+        
+        # 添加用户消息气泡
+        self._add_message_bubble("user", text)
         self._input.clear()
         
         # 创建 AI 回复气泡
-        self._current_bubble = self._add_message("assistant", "")
+        self._current_bubble = self._add_message_bubble("assistant", "")
         
-        # 启动生成
+        # 准备消息列表（包含当前用户消息）
+        messages_for_api = self._messages.copy()
+        
+        # 启动生成，传入完整对话历史
         model = self._model_combo.currentText()
-        system = "You are a helpful AI programming assistant."
+        system = "你是一个有用的AI编程助手。请始终使用中文回复用户的问题。"
         
-        self._current_worker = AIChatWorker(self._api, model, text, system)
+        self._current_worker = AIChatWorker(
+            self._api, model, messages_for_api, system
+        )
         self._current_worker.message_chunk.connect(self._on_message_chunk)
         self._current_worker.message_complete.connect(self._on_message_complete)
         self._current_worker.error_occurred.connect(self._on_error)
@@ -393,8 +785,8 @@ class AIChat(QWidget):
         self._send_btn.setEnabled(False)
         self._stop_btn.setEnabled(True)
     
-    def _add_message(self, role: str, content: str) -> MessageBubble:
-        """添加消息"""
+    def _add_message_bubble(self, role: str, content: str) -> MessageBubble:
+        """添加消息气泡（仅UI）"""
         bubble = MessageBubble(role, content)
         self._bubbles.append(bubble)
         
@@ -421,6 +813,15 @@ class AIChat(QWidget):
     
     def _on_message_complete(self):
         """消息生成完成"""
+        # 保存AI回复到历史
+        if hasattr(self, '_current_bubble'):
+            content = self._current_bubble.get_content()
+            if content:
+                ai_msg = Message(role="assistant", content=content)
+                self._messages.append(ai_msg)
+                # 自动保存对话历史
+                self._save_conversation_history()
+        
         self._send_btn.setEnabled(True)
         self._stop_btn.setEnabled(False)
         self._current_worker = None
