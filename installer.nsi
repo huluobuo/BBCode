@@ -7,11 +7,11 @@
 ; Application Information
 !define APPNAME "BBCode"
 !define COMPANYNAME "huluobuo"
-!define DESCRIPTION "BBCode - Python Editor"
-!define VERSIONMAJOR 1
+!define DESCRIPTION "BBCode - Python IDE"
+!define VERSIONMAJOR 3
 !define VERSIONMINOR 0
-!define VERSIONBUILD 1
-!define VERSIONPATCH 12
+!define VERSIONBUILD 0
+!define VERSIONPATCH 0
 !define HELPURL "https://github.com/huluobuo/BBCode"
 !define UPDATEURL "https://github.com/huluobuo/BBCode/releases"
 !define ABOUTURL "https://github.com/huluobuo/BBCode"
@@ -29,8 +29,8 @@ InstallDirRegKey HKCU "Software\BBCode" "Install_Dir"
 RequestExecutionLevel user
 
 ; Installer Icon
-!define MUI_ICON "thonny\res\bbc.ico"
-!define MUI_UNICON "thonny\res\bbc.ico"
+!define MUI_ICON "res\bbc.ico"
+!define MUI_UNICON "res\bbc.ico"
 
 ; UI Settings
 !define MUI_ABORTWARNING
@@ -83,7 +83,7 @@ Section "Install"
     File "launcher.py"
     File "pyvenv.cfg"
     File "LICENSE.txt"
-    File "README.rst"
+    File "README.md"
     
     ; Create Directories and Copy Contents
     SetOutPath "$INSTDIR\Scripts"
@@ -91,6 +91,9 @@ Section "Install"
     
     SetOutPath "$INSTDIR\Lib"
     File /r "Lib\*.*"
+    
+    SetOutPath "$INSTDIR\bbcode"
+    File /r "bbcode\*.*"
     
     SetOutPath "$INSTDIR\data"
     File /r "data\*.*"
@@ -101,25 +104,19 @@ Section "Install"
     SetOutPath "$INSTDIR\locale"
     File /r "locale\*.*"
     
-    SetOutPath "$INSTDIR\plugins"
-    File /r "plugins\*.*"
-    
     SetOutPath "$INSTDIR\python"
     File /r "python\*.*"
     
     SetOutPath "$INSTDIR\res"
     File /r "res\*.*"
     
-    SetOutPath "$INSTDIR\thonny"
-    File /r "thonny\*.*"
-    
     ; Create Start Menu Shortcuts
     CreateDirectory "$SMPROGRAMS\BBCode"
-    CreateShortcut "$SMPROGRAMS\BBCode\BBCode.lnk" "$INSTDIR\BBCode.exe" "" "$INSTDIR\thonny\res\bbc.ico" 0
-    CreateShortcut "$SMPROGRAMS\BBCode\Uninstall BBCode.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\thonny\res\bbc.ico" 0
+    CreateShortcut "$SMPROGRAMS\BBCode\BBCode.lnk" "$INSTDIR\BBCode.exe" "" "$INSTDIR\res\bbc.ico" 0
+    CreateShortcut "$SMPROGRAMS\BBCode\Uninstall BBCode.lnk" "$INSTDIR\uninstall.exe" "" "$INSTDIR\res\bbc.ico" 0
     
     ; Create Desktop Shortcut
-    CreateShortcut "$DESKTOP\BBCode.lnk" "$INSTDIR\BBCode.exe" "" "$INSTDIR\thonny\res\bbc.ico" 0
+    CreateShortcut "$DESKTOP\BBCode.lnk" "$INSTDIR\BBCode.exe" "" "$INSTDIR\res\bbc.ico" 0
     
     ; Create Uninstaller
     WriteUninstaller "$INSTDIR\uninstall.exe"
@@ -130,7 +127,7 @@ Section "Install"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\BBCode" "UninstallString" '"$INSTDIR\uninstall.exe"'
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\BBCode" "QuietUninstallString" '"$INSTDIR\uninstall.exe" /S'
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\BBCode" "InstallLocation" "$INSTDIR"
-    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\BBCode" "DisplayIcon" "$INSTDIR\thonny\res\bbc.ico"
+    WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\BBCode" "DisplayIcon" "$INSTDIR\res\bbc.ico"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\BBCode" "Publisher" "${COMPANYNAME}"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\BBCode" "HelpLink" "${HELPURL}"
     WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Uninstall\BBCode" "URLUpdateInfo" "${UPDATEURL}"
@@ -157,21 +154,21 @@ Section "Uninstall"
     Delete "$INSTDIR\BBCode.bat"
     Delete "$INSTDIR\BBCodew.bat"
     Delete "$INSTDIR\launcher.py"
+    Delete "$INSTDIR\main.py"
     Delete "$INSTDIR\pyvenv.cfg"
     Delete "$INSTDIR\LICENSE.txt"
-    Delete "$INSTDIR\README.rst"
+    Delete "$INSTDIR\README.md"
     Delete "$INSTDIR\uninstall.exe"
     
     ; Delete Directories
     RMDir /r "$INSTDIR\Scripts"
     RMDir /r "$INSTDIR\Lib"
+    RMDir /r "$INSTDIR\bbcode"
     RMDir /r "$INSTDIR\data"
     RMDir /r "$INSTDIR\licenses"
     RMDir /r "$INSTDIR\locale"
-    RMDir /r "$INSTDIR\plugins"
     RMDir /r "$INSTDIR\python"
     RMDir /r "$INSTDIR\res"
-    RMDir /r "$INSTDIR\thonny"
     
     ; Remove Installation Directory
     RMDir "$INSTDIR"

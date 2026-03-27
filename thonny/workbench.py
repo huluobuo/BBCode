@@ -681,7 +681,7 @@ class Workbench(tk.Tk):
                 getattr(m, load_function_name)()
             except Exception:
                 logger.exception("Could not load plugin")
-                self.report_exception("Coult not load plugin " + m.__name__)
+                self.report_exception("Could not load plugin " + m.__name__)
 
     def _init_fonts(self) -> None:
         # set up editor and shell fonts
