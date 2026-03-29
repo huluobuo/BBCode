@@ -1,12 +1,14 @@
 """
 知识库管理模块
 提供知识库文件的加载、检索和管理功能
+支持云端同步
 """
 
 import os
 import re
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
+from datetime import datetime
 
 
 class KnowledgeItem:
@@ -23,7 +25,7 @@ class KnowledgeItem:
 
 
 class KnowledgeBase:
-    """知识库管理器"""
+    """知识库管理器 - 支持云端同步"""
 
     DEFAULT_KB_DIR = "knowledge_base"
 
@@ -34,15 +36,114 @@ class KnowledgeBase:
             kb_dir: 知识库目录路径，默认为工作目录下的 knowledge_base 文件夹
         """
         if kb_dir is None:
-            from thonny import get_workbench
-
-            self.kb_dir = os.path.join(get_workbench().get_local_cwd(), self.DEFAULT_KB_DIR)
+            try:
+                from thonny import get_workbench
+                workbench = get_workbench()
+                if workbench:
+                    self.kb_dir = os.path.join(workbench.get_local_cwd(), self.DEFAULT_KB_DIR)
+                else:
+                    self.kb_dir = os.path.join(os.getcwd(), self.DEFAULT_KB_DIR)
+            except Exception:
+                self.kb_dir = os.path.join(os.getcwd(), self.DEFAULT_KB_DIR)
         else:
             self.kb_dir = kb_dir
 
         self.knowledge_items: List[KnowledgeItem] = []
+        self._cloud_client = None
+        self._last_sync_time: Optional[str] = None
+        self._sync_enabled = False
         self._ensure_kb_dir_exists()
         self.load_all_knowledge()
+        self._init_cloud_client()
+
+    def _init_cloud_client(self):
+        """初始化云客户端"""
+        try:
+            from plugins.cloud_kb_client import get_cloud_kb_client
+            self._cloud_client = get_cloud_kb_client()
+            self._load_cloud_config()
+        except ImportError:
+            self._cloud_client = None
+
+    def _load_cloud_config(self):
+        """加载云端配置"""
+        try:
+            from thonny import get_workbench
+            workbench = get_workbench()
+            server_url = workbench.get_option("cloud_kb.server_url", "")
+            api_key = workbench.get_option("cloud_kb.api_key", "")
+            self._sync_enabled = workbench.get_option("cloud_kb.sync_enabled", False)
+            
+            if self._cloud_client and server_url and api_key:
+                self._cloud_client.set_credentials(server_url, api_key)
+        except Exception:
+            pass
+
+    def is_cloud_sync_enabled(self) -> bool:
+        """检查是否启用了云端同步"""
+        return self._sync_enabled and self._cloud_client is not None and self._cloud_client.is_configured()
+
+    def sync_from_cloud(self) -> Tuple[bool, str]:
+        """从云端同步知识库
+        
+        Returns:
+            (success, message) 元组
+        """
+        if not self.is_cloud_sync_enabled():
+            return False, "云端同步未启用或未配置"
+        
+        if self._cloud_client is None:
+            return False, "云客户端未初始化"
+        
+        try:
+            result = self._cloud_client.sync_from_cloud(self.kb_dir)
+            if result.success:
+                self._last_sync_time = datetime.now().isoformat()
+                self.load_all_knowledge()  # 重新加载知识库
+                return True, result.message
+            else:
+                return False, result.message
+        except Exception as e:
+            return False, f"同步失败: {str(e)}"
+
+    def test_cloud_connection(self) -> Tuple[bool, str]:
+        """测试云端连接
+        
+        Returns:
+            (success, message) 元组
+        """
+        if self._cloud_client is None:
+            return False, "云客户端未初始化"
+        
+        if not self._cloud_client.is_configured():
+            return False, "云知识库未配置"
+        
+        return self._cloud_client.test_connection()
+
+    def get_last_sync_time(self) -> Optional[str]:
+        """获取上次同步时间"""
+        return self._last_sync_time
+
+    def set_cloud_sync_enabled(self, enabled: bool):
+        """设置云端同步开关"""
+        self._sync_enabled = enabled
+        try:
+            from thonny import get_workbench
+            get_workbench().set_option("cloud_kb.sync_enabled", enabled)
+        except Exception:
+            pass
+
+    def update_cloud_credentials(self, server_url: str, api_key: str):
+        """更新云端凭证"""
+        if self._cloud_client:
+            self._cloud_client.set_credentials(server_url, api_key)
+        
+        try:
+            from thonny import get_workbench
+            get_workbench().set_option("cloud_kb.server_url", server_url)
+            get_workbench().set_option("cloud_kb.api_key", api_key)
+        except Exception:
+            pass
 
     def _ensure_kb_dir_exists(self):
         """确保知识库目录存在"""

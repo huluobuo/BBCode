@@ -3,6 +3,7 @@
 BBCode AI 聊天组件
 支持 Ollama 本地模型，支持上下文记忆和对话管理
 使用 /api/chat 接口进行原生对话
+集成云知识库功能
 """
 
 import json
@@ -22,6 +23,14 @@ from PyQt6.QtWidgets import (
 )
 from PyQt6.QtCore import Qt, pyqtSignal, QThread, QTimer, QUrl
 from PyQt6.QtGui import QFont, QColor, QAction, QClipboard
+
+# 导入知识库模块
+try:
+    from plugins.knowledge_base import get_knowledge_base
+    from plugins.cloud_kb_client import get_cloud_kb_client
+    KNOWLEDGE_BASE_AVAILABLE = True
+except ImportError:
+    KNOWLEDGE_BASE_AVAILABLE = False
 
 
 @dataclass
@@ -419,7 +428,7 @@ class MessageBubble(QFrame):
 
 
 class AIChat(QWidget):
-    """AI 聊天组件 - 支持上下文记忆和对话管理"""
+    """AI 聊天组件 - 支持上下文记忆和对话管理，集成云知识库"""
     
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -429,11 +438,28 @@ class AIChat(QWidget):
         self._messages: List[Message] = []
         self._bubbles: List[MessageBubble] = []
         
+        # 初始化知识库
+        self._kb = None
+        self._cloud_kb = None
+        self._kb_enabled = False
+        self._init_knowledge_base()
+        
         self._setup_ui()
         self._check_ollama()
         
         # 尝试加载上次的对话
         self._load_conversation_history()
+    
+    def _init_knowledge_base(self):
+        """初始化知识库"""
+        if KNOWLEDGE_BASE_AVAILABLE:
+            try:
+                self._kb = get_knowledge_base()
+                self._cloud_kb = get_cloud_kb_client()
+                self._kb_enabled = True
+            except Exception as e:
+                print(f"知识库初始化失败: {e}")
+                self._kb_enabled = False
     
     def _setup_ui(self):
         layout = QVBoxLayout(self)
@@ -589,21 +615,113 @@ class AIChat(QWidget):
             QMenu::item:selected {
                 background-color: #007acc;
             }
+            QMenu::separator {
+                height: 1px;
+                background-color: #555;
+                margin: 4px 0;
+            }
         """)
         
-        clear_action = QAction("清空对话", self)
+        clear_action = QAction("🗑️ 清空对话", self)
         clear_action.triggered.connect(self._clear_conversation)
         menu.addAction(clear_action)
         
-        save_action = QAction("保存对话", self)
+        save_action = QAction("💾 保存对话", self)
         save_action.triggered.connect(self._save_conversation)
         menu.addAction(save_action)
         
-        load_action = QAction("加载对话", self)
+        load_action = QAction("📂 加载对话", self)
         load_action.triggered.connect(self._load_conversation)
         menu.addAction(load_action)
         
+        menu.addSeparator()
+        
+        # 知识库相关选项
+        kb_menu = menu.addMenu("📚 知识库")
+        kb_menu.setStyleSheet(menu.styleSheet())
+        
+        if self._kb_enabled:
+            # 同步知识库
+            sync_action = QAction("🔄 同步云知识库", kb_menu)
+            sync_action.triggered.connect(self._sync_knowledge_base)
+            kb_menu.addAction(sync_action)
+            
+            # 知识库设置
+            kb_settings_action = QAction("⚙️ 云知识库设置...", kb_menu)
+            kb_settings_action.triggered.connect(self._open_kb_settings)
+            kb_menu.addAction(kb_settings_action)
+            
+            kb_menu.addSeparator()
+            
+            # 显示知识库状态
+            if self._kb and self._kb.is_cloud_sync_enabled():
+                status_action = QAction("✅ 云端同步已启用", kb_menu)
+            else:
+                status_action = QAction("⚠️ 云端同步未启用", kb_menu)
+            status_action.setEnabled(False)
+            kb_menu.addAction(status_action)
+        else:
+            kb_unavailable_action = QAction("知识库不可用", kb_menu)
+            kb_unavailable_action.setEnabled(False)
+            kb_menu.addAction(kb_unavailable_action)
+        
         menu.exec(self._manage_btn.mapToGlobal(self._manage_btn.rect().bottomLeft()))
+    
+    def _sync_knowledge_base(self):
+        """同步知识库"""
+        if not self._kb_enabled or not self._kb:
+            QMessageBox.warning(self, "警告", "知识库未启用")
+            return
+        
+        if not self._kb.is_cloud_sync_enabled():
+            reply = QMessageBox.question(
+                self,
+                "云知识库未启用",
+                "云端同步未启用或未配置。是否打开设置？",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+            )
+            if reply == QMessageBox.StandardButton.Yes:
+                self._open_kb_settings()
+            return
+        
+        # 显示进度对话框
+        from PyQt6.QtWidgets import QProgressDialog
+        progress = QProgressDialog("正在同步云知识库...", "取消", 0, 0, self)
+        progress.setWindowModality(Qt.WindowModality.WindowModal)
+        progress.setWindowTitle("同步中")
+        progress.show()
+        
+        # 在后台线程中同步
+        def do_sync():
+            success, message = self._kb.sync_from_cloud()
+            return success, message
+        
+        from concurrent.futures import ThreadPoolExecutor
+        executor = ThreadPoolExecutor(max_workers=1)
+        future = executor.submit(do_sync)
+        
+        def check_result():
+            if future.done():
+                progress.close()
+                success, message = future.result()
+                if success:
+                    QMessageBox.information(self, "同步成功", message)
+                else:
+                    QMessageBox.warning(self, "同步失败", message)
+                executor.shutdown()
+            else:
+                from PyQt6.QtCore import QTimer
+                QTimer.singleShot(100, check_result)
+        
+        check_result()
+    
+    def _open_kb_settings(self):
+        """打开知识库设置"""
+        try:
+            from plugins.cloud_kb_settings import show_cloud_kb_settings
+            show_cloud_kb_settings(self)
+        except Exception as e:
+            QMessageBox.critical(self, "错误", f"无法打开设置: {str(e)}")
     
     def _clear_conversation(self):
         """清空对话"""
@@ -770,9 +888,11 @@ class AIChat(QWidget):
         # 准备消息列表（包含当前用户消息）
         messages_for_api = self._messages.copy()
         
+        # 构建系统提示词，包含知识库上下文
+        system = self._build_system_prompt(text)
+        
         # 启动生成，传入完整对话历史
         model = self._model_combo.currentText()
-        system = "你是一个有用的AI编程助手。请始终使用中文回复用户的问题。"
         
         self._current_worker = AIChatWorker(
             self._api, model, messages_for_api, system
@@ -784,6 +904,28 @@ class AIChat(QWidget):
         
         self._send_btn.setEnabled(False)
         self._stop_btn.setEnabled(True)
+    
+    def _build_system_prompt(self, query: str) -> str:
+        """构建系统提示词，包含知识库上下文
+        
+        Args:
+            query: 用户查询内容
+            
+        Returns:
+            包含知识库上下文的系统提示词
+        """
+        base_prompt = "你是一个有用的AI编程助手。请始终使用中文回复用户的问题。"
+        
+        # 如果知识库可用，添加相关知识
+        if self._kb_enabled and self._kb:
+            try:
+                kb_context = self._kb.get_context_for_query(query, max_length=1500)
+                if kb_context:
+                    base_prompt += f"\n\n在回答问题时，请参考以下知识库内容：\n{kb_context}"
+            except Exception as e:
+                print(f"获取知识库上下文失败: {e}")
+        
+        return base_prompt
     
     def _add_message_bubble(self, role: str, content: str) -> MessageBubble:
         """添加消息气泡（仅UI）"""

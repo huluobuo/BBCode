@@ -1,3 +1,2 @@
 @echo off
-cd /d "%~dp0"
-.\python\pythonw.exe launcher.py %*
+start "" "%~dp0python\pythonw.exe" "%~dp0launcher.py"

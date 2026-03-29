@@ -4,6 +4,7 @@ BBCode 代码编辑器组件
 整合：行号显示、语法高亮、语法检查
 """
 
+import os
 import re
 import sys
 import subprocess
@@ -317,13 +318,13 @@ class CodeEditor(QPlainTextEdit):
         undo_action = menu.addAction("撤销")
         undo_action.setShortcut("Ctrl+Z")
         undo_action.triggered.connect(self.undo)
-        undo_action.setEnabled(self.isUndoAvailable())
+        undo_action.setEnabled(self.isUndoRedoEnabled() and self.document().isUndoAvailable())
         
         # 重做
         redo_action = menu.addAction("重做")
         redo_action.setShortcut("Ctrl+Y")
         redo_action.triggered.connect(self.redo)
-        redo_action.setEnabled(self.isRedoAvailable())
+        redo_action.setEnabled(self.isUndoRedoEnabled() and self.document().isRedoAvailable())
         
         menu.addSeparator()
         
@@ -370,6 +371,7 @@ class CodeEditor(QPlainTextEdit):
 class EditorTabWidget(QTabWidget):
     file_saved = pyqtSignal(str)
     file_modified = pyqtSignal(int, bool)
+    run_code_requested = pyqtSignal(str, str)  # 代码, 临时文件路径
     
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -377,7 +379,9 @@ class EditorTabWidget(QTabWidget):
         self.setMovable(True)
         self.setDocumentMode(True)
         self.tabCloseRequested.connect(self._close_tab)
-        self._editors: dict = {}
+        self._editors: dict = {}  # index -> editor
+        self._temp_files: dict = {}  # index -> temp_file_path
+        self._demo_counter = 0  # demo文件计数器
     
     def create_new_tab(self, title: str = "未命名.py", file_path: Optional[str] = None) -> CodeEditor:
         editor = CodeEditor()
@@ -387,6 +391,19 @@ class EditorTabWidget(QTabWidget):
         index = self.addTab(editor, title)
         self.setCurrentIndex(index)
         self._editors[index] = editor
+        
+        # 如果是新文件（非打开现有文件），分配一个demo文件
+        if file_path is None:
+            self._demo_counter += 1
+            work_dir = os.path.dirname(os.path.dirname(__file__))
+            # 使用 demo 文件夹存放临时文件
+            demo_dir = os.path.join(work_dir, "demo")
+            os.makedirs(demo_dir, exist_ok=True)
+            temp_file = os.path.join(demo_dir, f"demo{self._demo_counter}.py")
+            self._temp_files[index] = temp_file
+            # 在标签页tooltip中显示关联的demo文件
+            self.setTabToolTip(index, f"临时文件: {temp_file}")
+        
         editor.modificationChanged.connect(lambda modified: self._on_editor_modified(index, modified))
         editor.syntax_error.connect(self._on_syntax_error)
         return editor
@@ -437,6 +454,27 @@ class EditorTabWidget(QTabWidget):
         widget = self.currentWidget()
         return widget if isinstance(widget, CodeEditor) else None
     
+    def get_current_temp_file(self) -> Optional[str]:
+        """获取当前标签页关联的临时文件路径"""
+        current_index = self.currentIndex()
+        return self._temp_files.get(current_index)
+    
+    def run_current_file(self):
+        """运行当前标签页的代码"""
+        editor = self.get_current_editor()
+        if not editor:
+            return
+        
+        code = editor.get_text()
+        if not code.strip():
+            return
+        
+        # 获取关联的临时文件路径
+        temp_file = self.get_current_temp_file()
+        
+        # 发送信号，由主窗口处理实际执行
+        self.run_code_requested.emit(code, temp_file or "")
+    
     def _close_tab(self, index: int):
         editor = self._editors.get(index)
         if editor and editor.is_modified():
@@ -453,16 +491,34 @@ class EditorTabWidget(QTabWidget):
             elif reply == QMessageBox.StandardButton.Cancel:
                 return
         
+        # 删除关联的临时demo文件
+        if index in self._temp_files:
+            temp_file = self._temp_files[index]
+            try:
+                if os.path.exists(temp_file):
+                    os.remove(temp_file)
+            except Exception as e:
+                print(f"删除临时文件失败: {temp_file}, 错误: {e}")
+            del self._temp_files[index]
+        
         self.removeTab(index)
         if index in self._editors:
             del self._editors[index]
         
+        # 重建索引
         new_editors = {}
+        new_temp_files = {}
         for i in range(self.count()):
             widget = self.widget(i)
             if isinstance(widget, CodeEditor):
                 new_editors[i] = widget
+                # 重建临时文件索引
+                for old_index, temp_file in list(self._temp_files.items()):
+                    if self.widget(old_index) == widget:
+                        new_temp_files[i] = temp_file
+                        break
         self._editors = new_editors
+        self._temp_files = new_temp_files
     
     def _on_editor_modified(self, index: int, modified: bool):
         title = self.tabText(index)

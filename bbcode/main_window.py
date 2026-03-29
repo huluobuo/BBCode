@@ -234,7 +234,6 @@ class MainWindow(QMainWindow):
         
         # 运行操作
         run_action = QAction(QIcon("res/run-current-script.png"), "运行", self)
-        run_action.setShortcut("F5")
         run_action.triggered.connect(self._run_code)
         toolbar.addAction(run_action)
         
@@ -458,9 +457,13 @@ class MainWindow(QMainWindow):
         editor = self._editor_tabs.get_current_editor()
         if editor:
             code = editor.get_text()
-            self._terminal._terminal.append_output("\n[运行代码]\n", "#4ec9b0")
-            # 这里可以添加实际的代码运行逻辑
-            self._statusbar.showMessage("运行功能待实现", 3000)
+            # 获取当前标签页关联的临时文件路径
+            temp_file = self._editor_tabs.get_current_temp_file()
+            self._terminal.execute_code(code, temp_file)
+            # 更新标签页tooltip显示执行的文件
+            if temp_file:
+                self._editor_tabs.setTabToolTip(self._editor_tabs.currentIndex(), f"临时文件: {temp_file}")
+            self._statusbar.showMessage("代码已发送到终端执行", 3000)
     
     # ==================== 设置操作 ====================
     
