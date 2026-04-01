@@ -1,0 +1,159 @@
+OpenShadingLanguage 1.00
+# Compiled by oslc 1.14.7.0
+# options: -q -O2 -IC:/Users/blender/git/blender-v500/blender.git/intern/cycles/kernel/osl/shaders -IC:/Users/blender/git/blender-v500/blender.git/lib/windows_x64/osl/share/OSL/shaders -o C:/Users/blender/git/blender-v500/build_release_2019/intern/cycles/kernel/osl/shaders/node_attribute.oso
+shader node_attribute
+param	string	bump_offset	"center"		%read{26,40} %write{2147483647,-1}
+param	float	bump_filter_width	0.100000001		%read{29,52} %write{2147483647,-1} %derivs
+param	string	name	""		%read{1,19} %write{2147483647,-1} %derivs
+oparam	point	Vector	0 0 0		%read{31,47} %write{24,47} %derivs
+oparam	color	Color	0 0 0		%read{12,44} %write{10,44} %derivs
+oparam	float	Fac	0		%read{34,50} %write{17,50} %derivs
+oparam	float	Alpha	0		%read{37,53} %write{25,53} %derivs
+global	point	P	%read{10,10} %write{2147483647,-1} %derivs
+local	float[4]	data	%read{20,25} %write{0,18} %derivs
+local	int	success	%read{2,2} %write{1,1}
+const	float[4]	$const1	0 0 0 0 		%read{0,0} %write{2147483647,-1}
+temp	int	$tmp1	%read{3,3} %write{2,2}
+const	int	$const2	0		%read{2,20} %write{2147483647,-1}
+temp	int	$tmp2	%read{4,8} %write{3,7}
+const	string	$const3	"geom:generated"		%read{5,5} %write{2147483647,-1}
+temp	int	$tmp3	%read{6,6} %write{5,5}
+temp	int	$tmp4	%read{7,7} %write{6,6}
+const	string	$const4	"object"		%read{10,10} %write{2147483647,-1}
+const	string	$const5	"transform"		%read{9,9} %write{2147483647,-1}
+const	string	$const6	"common"		%read{10,10} %write{2147483647,-1}
+const	string	$const7	"average"		%read{11,11} %write{2147483647,-1}
+temp	float	$tmp5	%read{14,14} %write{12,12} %derivs
+const	int	$const8	1		%read{13,21} %write{2147483647,-1}
+temp	float	$tmp6	%read{14,14} %write{13,13} %derivs
+temp	float	$tmp7	%read{16,16} %write{14,14} %derivs
+const	int	$const9	2		%read{15,22} %write{2147483647,-1}
+temp	float	$tmp8	%read{16,16} %write{15,15} %derivs
+temp	float	$tmp9	%read{17,17} %write{16,16} %derivs
+const	float	$const10	0.333333343		%read{17,17} %write{2147483647,-1}
+const	float	$const11	1		%read{18,18} %write{2147483647,-1}
+const	int	$const12	3		%read{18,25} %write{2147483647,-1}
+temp	int	$tmp10	%read{2147483647,-1} %write{19,19}
+temp	float	$tmp11	%read{23,23} %write{20,20} %derivs
+temp	float	$tmp12	%read{23,23} %write{21,21} %derivs
+temp	float	$tmp13	%read{23,23} %write{22,22} %derivs
+const	string	$const13	"dx"		%read{26,26} %write{2147483647,-1}
+temp	int	$tmp14	%read{27,27} %write{26,26}
+temp	color	$tmp15	%read{29,29} %write{28,28} %derivs
+temp	color	$tmp16	%read{30,30} %write{29,29} %derivs
+temp	vector	$tmp17	%read{32,32} %write{31,31} %derivs
+temp	vector	$tmp18	%read{33,33} %write{32,32} %derivs
+temp	float	$tmp19	%read{35,35} %write{34,34} %derivs
+temp	float	$tmp20	%read{36,36} %write{35,35} %derivs
+temp	float	$tmp21	%read{38,38} %write{37,37} %derivs
+temp	float	$tmp22	%read{39,39} %write{38,38} %derivs
+const	string	$const14	"dy"		%read{40,40} %write{2147483647,-1}
+temp	int	$tmp23	%read{41,41} %write{40,40}
+temp	color	$tmp24	%read{43,43} %write{42,42} %derivs
+temp	color	$tmp25	%read{44,44} %write{43,43} %derivs
+temp	vector	$tmp26	%read{46,46} %write{45,45} %derivs
+temp	vector	$tmp27	%read{47,47} %write{46,46} %derivs
+temp	float	$tmp28	%read{49,49} %write{48,48} %derivs
+temp	float	$tmp29	%read{50,50} %write{49,49} %derivs
+temp	float	$tmp30	%read{52,52} %write{51,51} %derivs
+temp	float	$tmp31	%read{53,53} %write{52,52} %derivs
+code ___main___
+# C:/Users/blender/git/blender-v500/blender.git/intern/cycles/kernel/osl/shaders/node_attribute.osl:16
+#   float data[4] = {0.0, 0.0, 0.0, 0.0};
+	assign		data $const1 	%filename{"C:/Users/blender/git/blender-v500/blender.git/intern/cycles/kernel/osl/shaders/node_attribute.osl"} %line{16} %argrw{"wr"}
+# C:/Users/blender/git/blender-v500/blender.git/intern/cycles/kernel/osl/shaders/node_attribute.osl:17
+#   int success = getattribute(name, data);
+	getattribute	success name data 	%line{17} %argrw{"wrw"}
+# C:/Users/blender/git/blender-v500/blender.git/intern/cycles/kernel/osl/shaders/node_attribute.osl:18
+#   if (!success && (name == "geom:generated")) {
+	eq		$tmp1 success $const2 	%line{18} %argrw{"wrr"}
+	neq		$tmp2 $tmp1 $const2 	%argrw{"wrr"}
+	if		$tmp2 8 8 	%argrw{"r"}
+	eq		$tmp3 name $const3 	%argrw{"wrr"}
+	neq		$tmp4 $tmp3 $const2 	%argrw{"wrr"}
+	assign		$tmp2 $tmp4 	%argrw{"wr"}
+	if		$tmp2 19 24 	%argrw{"r"}
+# C:/Users/blender/git/blender-v500/blender.git/intern/cycles/kernel/osl/shaders/node_attribute.osl:20
+#     Color = transform("object", P);
+	functioncall	$const5 11 	%line{20} %argrw{"r"}
+# C:/Users/blender/git/blender-v500/blender.git/lib/windows_x64/osl/share/OSL/shaders/stdosl.h:263
+# point  transform (string to, point p)  { return transform("common",to,p); }
+	transform	Color $const6 $const4 P 	%filename{"C:/Users/blender/git/blender-v500/blender.git/lib/windows_x64/osl/share/OSL/shaders/stdosl.h"} %line{263} %argrw{"wrrr"}
+# C:/Users/blender/git/blender-v500/blender.git/intern/cycles/kernel/osl/shaders/node_attribute.osl:21
+#     Fac = average(Color);
+	functioncall	$const7 18 	%filename{"C:/Users/blender/git/blender-v500/blender.git/intern/cycles/kernel/osl/shaders/node_attribute.osl"} %line{21} %argrw{"r"}
+# C:/Users/blender/git/blender-v500/blender.git/intern/cycles/kernel/osl/shaders\\node_math.h:146
+#   return (a[0] + a[1] + a[2]) * (1.0 / 3.0);
+	compref		$tmp5 Color $const2 	%filename{"C:/Users/blender/git/blender-v500/blender.git/intern/cycles/kernel/osl/shaders\\node_math.h"} %line{146} %argrw{"wrr"}
+	compref		$tmp6 Color $const8 	%argrw{"wrr"}
+	add		$tmp7 $tmp5 $tmp6 	%argrw{"wrr"}
+	compref		$tmp8 Color $const9 	%argrw{"wrr"}
+	add		$tmp9 $tmp7 $tmp8 	%argrw{"wrr"}
+	mul		Fac $tmp9 $const10 	%argrw{"wrr"}
+# C:/Users/blender/git/blender-v500/blender.git/intern/cycles/kernel/osl/shaders/node_attribute.osl:22
+#     data[3] = 1.0;
+	aassign		data $const12 $const11 	%filename{"C:/Users/blender/git/blender-v500/blender.git/intern/cycles/kernel/osl/shaders/node_attribute.osl"} %line{22} %argrw{"wrr"}
+# C:/Users/blender/git/blender-v500/blender.git/intern/cycles/kernel/osl/shaders/node_attribute.osl:25
+#     getattribute(name, Fac);
+	getattribute	$tmp10 name Fac 	%line{25} %argrw{"wrw"}
+# C:/Users/blender/git/blender-v500/blender.git/intern/cycles/kernel/osl/shaders/node_attribute.osl:26
+#     Color = color(data[0], data[1], data[2]);
+	aref		$tmp11 data $const2 	%line{26} %argrw{"wrr"}
+	aref		$tmp12 data $const8 	%argrw{"wrr"}
+	aref		$tmp13 data $const9 	%argrw{"wrr"}
+	color		Color $tmp11 $tmp12 $tmp13 	%argrw{"wrrr"}
+# C:/Users/blender/git/blender-v500/blender.git/intern/cycles/kernel/osl/shaders/node_attribute.osl:29
+#   Vector = point(Color);
+	assign		Vector Color 	%line{29} %argrw{"wr"}
+# C:/Users/blender/git/blender-v500/blender.git/intern/cycles/kernel/osl/shaders/node_attribute.osl:30
+#   Alpha = data[3];
+	aref		Alpha data $const12 	%line{30} %argrw{"wrr"}
+# C:/Users/blender/git/blender-v500/blender.git/intern/cycles/kernel/osl/shaders/node_attribute.osl:32
+#   if (bump_offset == "dx") {
+	eq		$tmp14 bump_offset $const13 	%line{32} %argrw{"wrr"}
+	if		$tmp14 40 54 	%argrw{"r"}
+# C:/Users/blender/git/blender-v500/blender.git/intern/cycles/kernel/osl/shaders/node_attribute.osl:33
+#     Color += Dx(Color) * bump_filter_width;
+	Dx		$tmp15 Color 	%line{33} %argrw{"wr"} %argderivs{1}
+	mul		$tmp16 $tmp15 bump_filter_width 	%argrw{"wrr"}
+	add		Color Color $tmp16 	%argrw{"wrr"}
+# C:/Users/blender/git/blender-v500/blender.git/intern/cycles/kernel/osl/shaders/node_attribute.osl:34
+#     Vector += Dx(Vector) * bump_filter_width;
+	Dx		$tmp17 Vector 	%line{34} %argrw{"wr"} %argderivs{1}
+	mul		$tmp18 $tmp17 bump_filter_width 	%argrw{"wrr"}
+	add		Vector Vector $tmp18 	%argrw{"wrr"}
+# C:/Users/blender/git/blender-v500/blender.git/intern/cycles/kernel/osl/shaders/node_attribute.osl:35
+#     Fac += Dx(Fac) * bump_filter_width;
+	Dx		$tmp19 Fac 	%line{35} %argrw{"wr"} %argderivs{1}
+	mul		$tmp20 $tmp19 bump_filter_width 	%argrw{"wrr"}
+	add		Fac Fac $tmp20 	%argrw{"wrr"}
+# C:/Users/blender/git/blender-v500/blender.git/intern/cycles/kernel/osl/shaders/node_attribute.osl:36
+#     Alpha += Dx(Alpha) * bump_filter_width;
+	Dx		$tmp21 Alpha 	%line{36} %argrw{"wr"} %argderivs{1}
+	mul		$tmp22 $tmp21 bump_filter_width 	%argrw{"wrr"}
+	add		Alpha Alpha $tmp22 	%argrw{"wrr"}
+# C:/Users/blender/git/blender-v500/blender.git/intern/cycles/kernel/osl/shaders/node_attribute.osl:38
+#   else if (bump_offset == "dy") {
+	eq		$tmp23 bump_offset $const14 	%line{38} %argrw{"wrr"}
+	if		$tmp23 54 54 	%argrw{"r"}
+# C:/Users/blender/git/blender-v500/blender.git/intern/cycles/kernel/osl/shaders/node_attribute.osl:39
+#     Color += Dy(Color) * bump_filter_width;
+	Dy		$tmp24 Color 	%line{39} %argrw{"wr"} %argderivs{1}
+	mul		$tmp25 $tmp24 bump_filter_width 	%argrw{"wrr"}
+	add		Color Color $tmp25 	%argrw{"wrr"}
+# C:/Users/blender/git/blender-v500/blender.git/intern/cycles/kernel/osl/shaders/node_attribute.osl:40
+#     Vector += Dy(Vector) * bump_filter_width;
+	Dy		$tmp26 Vector 	%line{40} %argrw{"wr"} %argderivs{1}
+	mul		$tmp27 $tmp26 bump_filter_width 	%argrw{"wrr"}
+	add		Vector Vector $tmp27 	%argrw{"wrr"}
+# C:/Users/blender/git/blender-v500/blender.git/intern/cycles/kernel/osl/shaders/node_attribute.osl:41
+#     Fac += Dy(Fac) * bump_filter_width;
+	Dy		$tmp28 Fac 	%line{41} %argrw{"wr"} %argderivs{1}
+	mul		$tmp29 $tmp28 bump_filter_width 	%argrw{"wrr"}
+	add		Fac Fac $tmp29 	%argrw{"wrr"}
+# C:/Users/blender/git/blender-v500/blender.git/intern/cycles/kernel/osl/shaders/node_attribute.osl:42
+#     Alpha += Dy(Alpha) * bump_filter_width;
+	Dy		$tmp30 Alpha 	%line{42} %argrw{"wr"} %argderivs{1}
+	mul		$tmp31 $tmp30 bump_filter_width 	%argrw{"wrr"}
+	add		Alpha Alpha $tmp31 	%argrw{"wrr"}
+	end

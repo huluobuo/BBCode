@@ -401,15 +401,72 @@ class MessageBubble(QFrame):
         return parts
     
     def _format_text(self, text: str) -> str:
-        """格式化文本内容"""
+        """格式化文本内容 - 支持 Markdown"""
         # 转义 HTML
         text = text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
         
-        # 处理行内代码
+        # 处理粗体 **text**
+        text = re.sub(
+            r'\*\*([^\*]+)\*\*',
+            r'<b>\1</b>',
+            text
+        )
+        
+        # 处理斜体 *text*
+        text = re.sub(
+            r'\*([^\*]+)\*',
+            r'<i>\1</i>',
+            text
+        )
+        
+        # 处理行内代码 `code`
         text = re.sub(
             r'`([^`]+)`',
             r'<code style="background:#2d2d2d;padding:2px 6px;border-radius:4px;color:#dcdcaa;font-family:monospace;font-size:13px;">\1</code>',
             text
+        )
+        
+        # 处理标题 ### Title
+        for i in range(6, 0, -1):
+            text = re.sub(
+                rf'^{"#" * i} (.+)$',
+                rf'<h{i}>\1</h{i}>',
+                text,
+                flags=re.MULTILINE
+            )
+        
+        # 处理无序列表 - item 或 * item
+        def format_list(match):
+            items = match.group(0).strip().split('\n')
+            formatted_items = []
+            for item in items:
+                item_text = re.sub(r'^[\-\*] ', '', item.strip())
+                if item_text:
+                    formatted_items.append(f'<li>{item_text}</li>')
+            return '<ul>' + ''.join(formatted_items) + '</ul>'
+        
+        text = re.sub(
+            r'((?:^[\-\*] .+\n?)+)',
+            format_list,
+            text,
+            flags=re.MULTILINE
+        )
+        
+        # 处理有序列表 1. item
+        def format_ordered_list(match):
+            items = match.group(0).strip().split('\n')
+            formatted_items = []
+            for item in items:
+                item_text = re.sub(r'^\d+\. ', '', item.strip())
+                if item_text:
+                    formatted_items.append(f'<li>{item_text}</li>')
+            return '<ol>' + ''.join(formatted_items) + '</ol>'
+        
+        text = re.sub(
+            r'((?:^\d+\. .+\n?)+)',
+            format_ordered_list,
+            text,
+            flags=re.MULTILINE
         )
         
         # 处理换行
@@ -433,7 +490,9 @@ class AIChat(QWidget):
     def __init__(self, parent=None):
         super().__init__(parent)
         
-        self._api = OllamaAPI()
+        # 从设置加载 Ollama 配置
+        self._load_ollama_config()
+        
         self._current_worker: Optional[AIChatWorker] = None
         self._messages: List[Message] = []
         self._bubbles: List[MessageBubble] = []
@@ -450,6 +509,36 @@ class AIChat(QWidget):
         # 尝试加载上次的对话
         self._load_conversation_history()
     
+    def _load_ollama_config(self):
+        """从设置加载 Ollama 配置"""
+        try:
+            from PyQt6.QtCore import QSettings
+            settings = QSettings("BBCode", "IDE")
+            
+            # 加载主机和端口
+            host = settings.value("ollamaHost", "127.0.0.1")
+            port = int(settings.value("ollamaPort", 11434))
+            
+            # 构建完整的 URL
+            if host.startswith("http://") or host.startswith("https://"):
+                ollama_url = f"{host}:{port}"
+            else:
+                ollama_url = f"http://{host}:{port}"
+            
+            # 加载默认模型
+            model = settings.value("defaultModel", "gemma3:1b")
+            
+            # 初始化 API
+            self._api = OllamaAPI(host=ollama_url)
+            self._api.default_model = model
+            
+            print(f"[AIChat] 已加载 Ollama 配置: {ollama_url}, 模型: {model}")
+        except Exception as e:
+            print(f"[AIChat] 加载 Ollama 配置失败: {e}")
+            # 使用默认配置
+            self._api = OllamaAPI()
+            self._api.default_model = "gemma3:1b"
+    
     def _init_knowledge_base(self):
         """初始化知识库"""
         if KNOWLEDGE_BASE_AVAILABLE:
@@ -462,6 +551,59 @@ class AIChat(QWidget):
                 self._kb_enabled = False
     
     def _setup_ui(self):
+        # 设置整体深色背景
+        self.setStyleSheet("""
+            QWidget {
+                background-color: #1e1e1e;
+                color: #d4d4d4;
+            }
+            QLabel {
+                color: #d4d4d4;
+            }
+            QComboBox {
+                background-color: #3c3c3c;
+                color: #d4d4d4;
+                border: 1px solid #555;
+                border-radius: 3px;
+                padding: 3px 8px;
+            }
+            QComboBox::drop-down {
+                border: none;
+                width: 20px;
+            }
+            QComboBox::down-arrow {
+                border-left: 5px solid transparent;
+                border-right: 5px solid transparent;
+                border-top: 5px solid #d4d4d4;
+            }
+            QComboBox QAbstractItemView {
+                background-color: #3c3c3c;
+                color: #d4d4d4;
+                border: 1px solid #555;
+                selection-background-color: #007acc;
+            }
+            QScrollArea {
+                background-color: #1e1e1e;
+                border: none;
+            }
+            QScrollBar:vertical {
+                background-color: #1e1e1e;
+                width: 12px;
+            }
+            QScrollBar::handle:vertical {
+                background-color: #424242;
+                min-height: 20px;
+                border-radius: 6px;
+                margin: 2px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background-color: #4f4f4f;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                height: 0px;
+            }
+        """)
+        
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)

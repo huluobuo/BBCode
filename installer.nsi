@@ -11,7 +11,7 @@
 !define VERSIONMAJOR 2
 !define VERSIONMINOR 0
 !define VERSIONBUILD 2
-!define VERSIONPATCH 1
+!define VERSIONPATCH 2
 !define HELPURL "https://github.com/huluobuo/BBCode"
 !define UPDATEURL "https://github.com/huluobuo/BBCode/releases"
 !define ABOUTURL "https://github.com/huluobuo/BBCode"
@@ -95,6 +95,9 @@ Section "Install"
     SetOutPath "$INSTDIR\bbcode"
     File /r "bbcode\*.*"
     
+    SetOutPath "$INSTDIR\plugins"
+    File /r "plugins\*.*"
+    
     SetOutPath "$INSTDIR\data"
     File /r "data\*.*"
     
@@ -164,6 +167,8 @@ Section "Uninstall"
     RMDir /r "$INSTDIR\Scripts"
     RMDir /r "$INSTDIR\Lib"
     RMDir /r "$INSTDIR\bbcode"
+    RMDir /r "$INSTDIR\plugins"
+    RMDir /r "$INSTDIR\thonny"
     RMDir /r "$INSTDIR\data"
     RMDir /r "$INSTDIR\licenses"
     RMDir /r "$INSTDIR\locale"

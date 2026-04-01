@@ -28,6 +28,81 @@ class FileExplorer(QWidget):
         self.set_root_path(self._current_root)
     
     def _setup_ui(self):
+        # 设置深色主题样式
+        self.setStyleSheet("""
+            QWidget {
+                background-color: #1e1e1e;
+                color: #d4d4d4;
+            }
+            QTreeView {
+                background-color: #1e1e1e;
+                color: #d4d4d4;
+                border: none;
+                outline: none;
+            }
+            QTreeView::item {
+                padding: 4px;
+            }
+            QTreeView::item:selected {
+                background-color: #007acc;
+                color: white;
+            }
+            QTreeView::item:hover {
+                background-color: #2d2d30;
+            }
+            QHeaderView::section {
+                background-color: #2d2d30;
+                color: #d4d4d4;
+                padding: 6px;
+                border: none;
+                border-right: 1px solid #3c3c3c;
+            }
+            QToolButton {
+                background-color: transparent;
+                border: none;
+                border-radius: 3px;
+                padding: 4px;
+            }
+            QToolButton:hover {
+                background-color: #3c3c3c;
+            }
+            QLabel {
+                color: #888;
+            }
+            QScrollBar:vertical {
+                background-color: #1e1e1e;
+                width: 12px;
+            }
+            QScrollBar::handle:vertical {
+                background-color: #424242;
+                min-height: 20px;
+                border-radius: 6px;
+                margin: 2px;
+            }
+            QScrollBar::handle:vertical:hover {
+                background-color: #4f4f4f;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                height: 0px;
+            }
+            QScrollBar:horizontal {
+                background-color: #1e1e1e;
+                height: 12px;
+            }
+            QScrollBar::handle:horizontal {
+                background-color: #424242;
+                min-width: 20px;
+                border-radius: 6px;
+                margin: 2px;
+            }
+            QScrollBar::handle:horizontal:hover {
+                background-color: #4f4f4f;
+            }
+            QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+                width: 0px;
+            }
+        """)
+        
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)

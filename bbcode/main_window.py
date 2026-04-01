@@ -156,14 +156,6 @@ class MainWindow(QMainWindow):
         self._show_file_explorer_action.setChecked(True)
         view_menu.addAction(self._show_file_explorer_action)
         
-        # 设置菜单
-        settings_menu = menubar.addMenu("设置(&S)")
-        
-        settings_action = QAction("首选项...", self)
-        settings_action.setShortcut("Ctrl+,")
-        settings_action.triggered.connect(self._show_settings)
-        settings_menu.addAction(settings_action)
-        
         self._show_ai_chat_action = QAction("AI 助手", self)
         self._show_ai_chat_action.setCheckable(True)
         self._show_ai_chat_action.setChecked(True)
@@ -179,6 +171,14 @@ class MainWindow(QMainWindow):
         reset_layout_action = QAction("重置布局", self)
         reset_layout_action.triggered.connect(self._reset_layout)
         view_menu.addAction(reset_layout_action)
+        
+        # 设置菜单
+        settings_menu = menubar.addMenu("设置(&S)")
+        
+        settings_action = QAction("首选项...", self)
+        settings_action.setShortcut("Ctrl+,")
+        settings_action.triggered.connect(self._show_settings)
+        settings_menu.addAction(settings_action)
         
         # 帮助菜单
         help_menu = menubar.addMenu("帮助(&H)")
@@ -459,10 +459,30 @@ class MainWindow(QMainWindow):
             code = editor.get_text()
             # 获取当前标签页关联的临时文件路径
             temp_file = self._editor_tabs.get_current_temp_file()
+            
+            # 如果没有临时文件，创建一个
+            if not temp_file:
+                import tempfile
+                import os
+                temp_dir = os.path.join(os.getcwd(), "temp")
+                os.makedirs(temp_dir, exist_ok=True)
+                with tempfile.NamedTemporaryFile(mode='w', suffix='.py', dir=temp_dir, delete=False) as f:
+                    f.write(code)
+                    temp_file = f.name
+                # 保存临时文件路径到标签页
+                current_index = self._editor_tabs.currentIndex()
+                self._editor_tabs._temp_files[current_index] = temp_file
+            else:
+                # 如果已有临时文件，确保文件内容是最新的
+                try:
+                    with open(temp_file, 'w', encoding='utf-8') as f:
+                        f.write(code)
+                except Exception as e:
+                    print(f"更新临时文件失败: {e}")
+            
             self._terminal.execute_code(code, temp_file)
             # 更新标签页tooltip显示执行的文件
-            if temp_file:
-                self._editor_tabs.setTabToolTip(self._editor_tabs.currentIndex(), f"临时文件: {temp_file}")
+            self._editor_tabs.setTabToolTip(self._editor_tabs.currentIndex(), f"临时文件: {temp_file}")
             self._statusbar.showMessage("代码已发送到终端执行", 3000)
     
     # ==================== 设置操作 ====================
@@ -583,6 +603,18 @@ def main():
         }
         QTreeView::item:hover {
             background-color: #2d2d30;
+        }
+        QPlainTextEdit {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            border: none;
+            selection-background-color: #264f78;
+        }
+        QTextEdit {
+            background-color: #1e1e1e;
+            color: #d4d4d4;
+            border: none;
+            selection-background-color: #264f78;
         }
         QScrollArea {
             border: none;

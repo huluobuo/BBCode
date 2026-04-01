@@ -1,148 +1,271 @@
 """
-Theme Switcher for BBCode
-Provides quick theme switching between light and dark modes
+BBCode 主题切换器 - 应用内主题切换
+支持快速切换和预览主题
 """
 
-import tkinter as tk
-from tkinter import ttk
+from PyQt6.QtWidgets import (
+    QDialog, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,
+    QListWidget, QListWidgetItem, QFrame, QSplitter,
+    QWidget, QGridLayout, QRadioButton, QButtonGroup,
+    QScrollArea, QSizePolicy
+)
+from PyQt6.QtCore import Qt, pyqtSignal
+from PyQt6.QtGui import QFont, QColor, QPalette
 
 from thonny import get_workbench
-from thonny.languages import tr
+from plugins.custom_themes import PREDEFINED_THEMES, ThemeConfig, generate_theme_settings
 
 
-class ThemeSwitcher:
-    """Manages theme switching functionality"""
+class ThemePreviewWidget(QFrame):
+    """主题预览组件"""
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setFrameStyle(QFrame.Shape.StyledPanel | QFrame.Shadow.Raised)
+        self.setMinimumSize(300, 200)
+        self._setup_ui()
+    
+    def _setup_ui(self):
+        """设置预览UI"""
+        layout = QVBoxLayout(self)
+        layout.setSpacing(10)
+        layout.setContentsMargins(15, 15, 15, 15)
+        
+        # 标题
+        title = QLabel("主题预览")
+        title.setFont(QFont("Segoe UI", 12, QFont.Weight.Bold))
+        layout.addWidget(title)
+        
+        # 示例组件容器
+        self.preview_container = QFrame()
+        preview_layout = QVBoxLayout(self.preview_container)
+        preview_layout.setSpacing(10)
+        
+        # 示例按钮
+        self.sample_button = QPushButton("示例按钮")
+        preview_layout.addWidget(self.sample_button)
+        
+        # 示例标签
+        self.sample_label = QLabel("示例文本标签")
+        preview_layout.addWidget(self.sample_label)
+        
+        # 示例输入框
+        self.sample_input = QLabel("输入框示例")
+        self.sample_input.setFrameStyle(QFrame.Shape.StyledPanel)
+        self.sample_input.setMinimumHeight(30)
+        preview_layout.addWidget(self.sample_input)
+        
+        preview_layout.addStretch()
+        layout.addWidget(self.preview_container)
+        layout.addStretch()
+    
+    def update_preview(self, config: ThemeConfig):
+        """更新预览"""
+        c = config.colors
+        
+        # 更新背景色
+        self.setStyleSheet(f"""
+            QFrame {{
+                background-color: {c['bg_primary']};
+                color: {c['text_primary']};
+            }}
+            QLabel {{
+                color: {c['text_primary']};
+            }}
+            QPushButton {{
+                background-color: {c['accent_primary']};
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 4px;
+            }}
+            QPushButton:hover {{
+                background-color: {c['accent_secondary']};
+            }}
+        """)
 
-    def __init__(self):
-        self.workbench = get_workbench()
-        self._current_theme_mode = self._detect_initial_mode()
 
-    def _detect_initial_mode(self) -> str:
-        """Detect initial theme mode from current theme"""
-        current_theme = self.workbench.get_option("view.ui_theme", "")
-        if "dark" in current_theme.lower() or "Dark" in current_theme:
-            return "dark"
-        return "light"
-
-    def toggle_theme(self):
-        """Toggle between light and dark themes"""
-        if self._current_theme_mode == "light":
-            self.set_dark_theme()
-        else:
-            self.set_light_theme()
-
-    def set_light_theme(self):
-        """Set light theme"""
-        self._current_theme_mode = "light"
-        self.workbench.set_option("view.ui_theme", "Modern Light")
-        self.workbench.set_option("view.syntax_theme", "Default Light")
-        self._apply_theme()
-
-    def set_dark_theme(self):
-        """Set dark theme"""
-        self._current_theme_mode = "dark"
-        self.workbench.set_option("view.ui_theme", "Modern Dark")
-        self.workbench.set_option("view.syntax_theme", "Default Dark")
-        self._apply_theme()
-
+class ThemeSwitcherDialog(QDialog):
+    """主题切换对话框 - 支持应用内切换"""
+    
+    theme_changed = pyqtSignal(str)  # 主题变更信号
+    
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("切换主题")
+        self.setMinimumSize(600, 450)
+        
+        self._current_theme = None
+        self._setup_ui()
+        self._load_current_theme()
+    
+    def _setup_ui(self):
+        """设置UI"""
+        layout = QVBoxLayout(self)
+        layout.setSpacing(15)
+        layout.setContentsMargins(20, 20, 20, 20)
+        
+        # 标题
+        title = QLabel("选择主题")
+        title.setFont(QFont("Segoe UI", 14, QFont.Weight.Bold))
+        layout.addWidget(title)
+        
+        # 分割器
+        splitter = QSplitter(Qt.Orientation.Horizontal)
+        
+        # 左侧：主题列表
+        left_widget = QWidget()
+        left_layout = QVBoxLayout(left_widget)
+        left_layout.setContentsMargins(0, 0, 0, 0)
+        
+        # 浅色主题组
+        light_group = QFrame()
+        light_layout = QVBoxLayout(light_group)
+        light_layout.setContentsMargins(10, 10, 10, 10)
+        light_layout.setSpacing(5)
+        
+        light_title = QLabel("浅色主题")
+        light_title.setFont(QFont("Segoe UI", 10, QFont.Weight.Bold))
+        light_layout.addWidget(light_title)
+        
+        self.light_buttons = QButtonGroup(self)
+        for key, preset in PREDEFINED_THEMES.items():
+            if not preset['is_dark']:
+                radio = QRadioButton(preset['name'])
+                radio.setProperty('theme_key', key)
+                self.light_buttons.addButton(radio)
+                light_layout.addWidget(radio)
+        
+        left_layout.addWidget(light_group)
+        
+        # 深色主题组
+        dark_group = QFrame()
+        dark_layout = QVBoxLayout(dark_group)
+        dark_layout.setContentsMargins(10, 10, 10, 10)
+        dark_layout.setSpacing(5)
+        
+        dark_title = QLabel("深色主题")
+        dark_title.setFont(QFont("Segoe UI", 10, QFont.Weight.Bold))
+        dark_layout.addWidget(dark_title)
+        
+        self.dark_buttons = QButtonGroup(self)
+        for key, preset in PREDEFINED_THEMES.items():
+            if preset['is_dark']:
+                radio = QRadioButton(preset['name'])
+                radio.setProperty('theme_key', key)
+                self.dark_buttons.addButton(radio)
+                dark_layout.addWidget(radio)
+        
+        left_layout.addWidget(dark_group)
+        left_layout.addStretch()
+        
+        # 连接信号
+        self.light_buttons.buttonClicked.connect(self._on_theme_selected)
+        self.dark_buttons.buttonClicked.connect(self._on_theme_selected)
+        
+        splitter.addWidget(left_widget)
+        
+        # 右侧：预览
+        self.preview = ThemePreviewWidget()
+        splitter.addWidget(self.preview)
+        
+        splitter.setSizes([250, 350])
+        layout.addWidget(splitter)
+        
+        # 按钮区域
+        btn_layout = QHBoxLayout()
+        btn_layout.addStretch()
+        
+        cancel_btn = QPushButton("取消")
+        cancel_btn.clicked.connect(self.reject)
+        btn_layout.addWidget(cancel_btn)
+        
+        apply_btn = QPushButton("应用")
+        apply_btn.setDefault(True)
+        apply_btn.clicked.connect(self._apply_theme)
+        btn_layout.addWidget(apply_btn)
+        
+        layout.addLayout(btn_layout)
+    
+    def _load_current_theme(self):
+        """加载当前主题"""
+        wb = get_workbench()
+        current_theme = wb.get_option("view.ui_theme", "Modern Light")
+        
+        # 查找并选中当前主题
+        for button in self.light_buttons.buttons():
+            key = button.property('theme_key')
+            if PREDEFINED_THEMES.get(key, {}).get('name') == current_theme:
+                button.setChecked(True)
+                self._preview_theme(key)
+                return
+        
+        for button in self.dark_buttons.buttons():
+            key = button.property('theme_key')
+            if PREDEFINED_THEMES.get(key, {}).get('name') == current_theme:
+                button.setChecked(True)
+                self._preview_theme(key)
+                return
+    
+    def _on_theme_selected(self, button):
+        """主题被选中"""
+        key = button.property('theme_key')
+        self._preview_theme(key)
+    
+    def _preview_theme(self, key: str):
+        """预览主题"""
+        if key in PREDEFINED_THEMES:
+            preset = PREDEFINED_THEMES[key]
+            config = ThemeConfig.from_dict(preset)
+            self.preview.update_preview(config)
+            self._current_theme = key
+    
     def _apply_theme(self):
-        """Apply the selected theme"""
-        self.workbench.reload_themes()
-        self.workbench.update_fonts()
-
-        # Update editor notebook appearance
-        if hasattr(self.workbench, "_editor_notebook"):
-            self.workbench._editor_notebook.update_appearance()
-
-        # Generate theme changed event
-        self.workbench.event_generate("ThemeChanged")
-
-    def get_current_mode(self) -> str:
-        """Get current theme mode"""
-        return self._current_theme_mode
-
-
-class ThemeSwitcherButton(ttk.Frame):
-    """Theme switcher toggle button with icon"""
-
-    def __init__(self, master=None, **kwargs):
-        super().__init__(master, **kwargs)
-
-        self.switcher = ThemeSwitcher()
-
-        # Create button
-        self.button = ttk.Button(
-            self, text="🌙", command=self._on_click, width=3  # Moon icon for dark mode
-        )
-        self.button.pack()
-
-        self._update_icon()
-
-    def _on_click(self):
-        """Handle button click"""
-        self.switcher.toggle_theme()
-        self._update_icon()
-
-    def _update_icon(self):
-        """Update button icon based on current mode"""
-        if self.switcher.get_current_mode() == "dark":
-            self.button.configure(text="☀️")  # Sun icon for light mode
+        """应用主题"""
+        if self._current_theme:
+            self._apply_preset_theme(self._current_theme)
+            self.theme_changed.emit(self._current_theme)
+            self.accept()
         else:
-            self.button.configure(text="🌙")  # Moon icon for dark mode
+            from PyQt6.QtWidgets import QMessageBox
+            QMessageBox.warning(self, "提示", "请先选择一个主题")
+    
+    def _apply_preset_theme(self, preset_key: str):
+        """应用预设主题"""
+        if preset_key in PREDEFINED_THEMES:
+            preset = PREDEFINED_THEMES[preset_key]
+            wb = get_workbench()
+            wb.set_option("view.ui_theme", preset['name'])
+            wb.reload_themes()
 
 
-def load_plugin() -> None:
-    """Load theme switcher plugin"""
-    workbench = get_workbench()
+def open_theme_switcher():
+    """打开主题切换对话框"""
+    from thonny import get_workbench
+    dialog = ThemeSwitcherDialog(get_workbench())
+    dialog.exec()
 
-    # Create theme switcher instance
-    workbench._theme_switcher = ThemeSwitcher()
 
-    # Add toggle theme command
-    workbench.add_command(
-        "toggle_theme",
+def load_plugin():
+    """加载插件"""
+    from thonny import get_workbench
+    
+    # 添加主题切换命令到视图菜单
+    get_workbench().add_command(
+        "switch_theme",
         "view",
-        "切换主题 (亮/暗)",
-        lambda: workbench._theme_switcher.toggle_theme(),
-        default_sequence="<Control-Shift-T>",
-        group=60,
+        "切换主题...",
+        open_theme_switcher,
+        group=45,  # 在自定义主题之前
     )
 
-    # Add theme submenu
-    workbench.add_command(
-        "set_light_theme",
-        "view",
-        "亮色主题",
-        lambda: workbench._theme_switcher.set_light_theme(),
-        group=60,
-    )
 
-    workbench.add_command(
-        "set_dark_theme",
-        "view",
-        "暗色主题",
-        lambda: workbench._theme_switcher.set_dark_theme(),
-        group=60,
-    )
-
-    # Set default theme if not set
-    if not workbench.get_option("view.ui_theme"):
-        # Detect system preference
-        try:
-            import winreg
-
-            registry = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
-            key = winreg.OpenKey(
-                registry, r"Software\Microsoft\Windows\CurrentVersion\Themes\Personalize"
-            )
-            value, _ = winreg.QueryValueEx(key, "AppsUseLightTheme")
-            if value == 0:
-                workbench.set_option("view.ui_theme", "Modern Dark")
-                workbench.set_option("view.syntax_theme", "Default Dark")
-            else:
-                workbench.set_option("view.ui_theme", "Modern Light")
-                workbench.set_option("view.syntax_theme", "Default Light")
-        except:
-            # Default to modern light
-            workbench.set_option("view.ui_theme", "Modern Light")
-            workbench.set_option("view.syntax_theme", "Default Light")
+if __name__ == "__main__":
+    # 测试代码
+    import sys
+    from PyQt6.QtWidgets import QApplication
+    
+    app = QApplication(sys.argv)
+    dialog = ThemeSwitcherDialog()
+    dialog.exec()
+    sys.exit(app.exec())

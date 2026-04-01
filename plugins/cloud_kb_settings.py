@@ -317,12 +317,12 @@ class CloudKBSettingsDialog(QDialog):
     def _load_settings(self):
         """加载设置"""
         try:
-            from thonny import get_workbench
-            workbench = get_workbench()
+            from PyQt6.QtCore import QSettings
+            settings = QSettings("BBCode", "IDE")
             
-            server_url = workbench.get_option("cloud_kb.server_url", "")
-            api_key = workbench.get_option("cloud_kb.api_key", "")
-            sync_enabled = workbench.get_option("cloud_kb.sync_enabled", False)
+            server_url = settings.value("cloud_kb.server_url", "")
+            api_key = settings.value("cloud_kb.api_key", "")
+            sync_enabled = settings.value("cloud_kb.sync_enabled", False) in [True, "true", "True"]
             
             self._server_url_input.setText(server_url)
             self._api_key_input.setText(api_key)
@@ -453,12 +453,12 @@ class CloudKBSettingsDialog(QDialog):
         sync_enabled = self._sync_enabled_checkbox.isChecked()
         
         try:
-            from thonny import get_workbench
-            workbench = get_workbench()
+            from PyQt6.QtCore import QSettings
+            settings = QSettings("BBCode", "IDE")
             
-            workbench.set_option("cloud_kb.server_url", server_url)
-            workbench.set_option("cloud_kb.api_key", api_key)
-            workbench.set_option("cloud_kb.sync_enabled", sync_enabled)
+            settings.setValue("cloud_kb.server_url", server_url)
+            settings.setValue("cloud_kb.api_key", api_key)
+            settings.setValue("cloud_kb.sync_enabled", sync_enabled)
             
             # 更新客户端凭证
             self._client.set_credentials(server_url, api_key)
